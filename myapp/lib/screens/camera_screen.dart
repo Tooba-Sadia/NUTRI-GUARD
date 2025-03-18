@@ -21,11 +21,12 @@ class _CameraScreenState extends State<CameraScreen> {
   void initState() {
     super.initState();
     _initializeCamera();
+    _takePicture();
   }
 
   Future<void> _initializeCamera() async {
     final CameraDescription camera =
-        cameras.length > 1 ? cameras[1] : cameras.first;
+        cameras.length > 1 ? cameras[0] : cameras.first;
 
     controller = CameraController(
       camera,
@@ -99,6 +100,11 @@ class _CameraScreenState extends State<CameraScreen> {
           aspectRatio: controller.value.aspectRatio,
           child: CameraPreview(controller),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _takePicture,
+        backgroundColor: Colors.white,
+        child: const Icon(Icons.camera, color: Colors.black),
       ),
     );
   }
