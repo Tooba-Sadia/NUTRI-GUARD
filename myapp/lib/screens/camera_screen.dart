@@ -1,6 +1,8 @@
 // lib/screens/camera_screen.dart
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 import '../main.dart'; // Importing the cameras list from main.dart
 import '../screens/image_view_page.dart';
 
@@ -62,18 +64,24 @@ class _CameraScreenState extends State<CameraScreen> {
         imageFile = picture;
       });
 
-      // Navigate to image view screen
+      // Get the temporary directory path
+      final directory = await getTemporaryDirectory();
+      final String imagePath = '${directory.path}/captured_image.jpg';
+
+      // Copy the image to the temporary directory
+      await File(picture.path).copy(imagePath);
+
+      // Navigate to image view screen with the saved image path
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ImageViewPage(imagePath: imageFile!.path),
+          builder: (context) => ImageViewPage(imagePath: imagePath),
         ),
       );
     } catch (e) {
       debugPrint("Error taking picture: $e");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
