@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'dart:io';
+import 'ai_processing_screen.dart';
 
 class ImageViewPage extends StatefulWidget {
   final String imagePath;
@@ -75,6 +76,43 @@ class _ImageViewPageState extends State<ImageViewPage> {
                 style: const TextStyle(fontSize: 16),
               ),
             ),
+            if (_recognizedText.isNotEmpty && !_isProcessing)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    // Delete the image file before navigating
+                    try {
+                      final file = File(widget.imagePath);
+                      if (file.existsSync()) {
+                        await file.delete();
+                      }
+                    } catch (e) {
+                      debugPrint('Error deleting image: $e');
+                    }
+
+                    if (mounted) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AIProcessingScreen(
+                            processedText: _recognizedText,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text('Next'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
