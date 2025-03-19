@@ -18,6 +18,7 @@ class _CameraScreenState extends State<CameraScreen> {
   bool _isCameraInitialized = false;
   String? _error;
   XFile? imageFile;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -59,6 +60,9 @@ class _CameraScreenState extends State<CameraScreen> {
 
   void _takePicture() async {
     try {
+      setState(() {
+        _isProcessing = true;
+      });
       final XFile picture = await controller.takePicture();
       setState(() {
         imageFile = picture;
@@ -80,6 +84,10 @@ class _CameraScreenState extends State<CameraScreen> {
       );
     } catch (e) {
       debugPrint("Error taking picture: $e");
+    } finally {
+      setState(() {
+        _isProcessing = false;
+      });
     }
   }
 
@@ -103,16 +111,44 @@ class _CameraScreenState extends State<CameraScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Camera View')),
-      body: Center(
-        child: AspectRatio(
-          aspectRatio: controller.value.aspectRatio,
-          child: CameraPreview(controller),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _takePicture,
-        backgroundColor: Colors.white,
-        child: const Icon(Icons.camera, color: Colors.black),
+      body: Stack(
+        children: [
+          // Camera preview with correct aspect ratio
+          Center(
+            child: AspectRatio(
+              aspectRatio:
+                  1 / controller.value.aspectRatio, // Inverse the aspect ratio
+              child: CameraPreview(controller),
+            ),
+          ),
+          // Camera button
+          Positioned(
+            bottom: 50,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: FloatingActionButton(
+                onPressed: _isProcessing ? null : _takePicture,
+                backgroundColor: Colors.white,
+                elevation: 8,
+                child: _isProcessing
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.black,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.camera,
+                        color: Colors.black,
+                        size: 40,
+                      ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
