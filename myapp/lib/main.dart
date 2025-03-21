@@ -1,12 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'routes/app_router.dart';
+import 'dart:async';
 
-late List<CameraDescription> cameras;
+List<CameraDescription> cameras = [];
 
-void main() async {
+Future<void> main() async {
+  // Ensure Flutter is properly initialized before doing anything
   WidgetsFlutterBinding.ensureInitialized();
-  cameras = await availableCameras();
+  
+  // Add this line to give the Flutter engine time to fully initialize
+  await Future.delayed(const Duration(milliseconds: 500));
+  
+  try {
+    // First camera initialization attempt
+    print('First attempt to get cameras...');
+    try {
+      cameras = await availableCameras();
+      print('First attempt found ${cameras.length} cameras');
+    } catch (e) {
+      print('First attempt failed: $e');
+      
+      // Wait a moment and try again
+      await Future.delayed(const Duration(seconds: 1));
+      
+      try {
+        print('Second attempt to get cameras...');
+        cameras = await availableCameras();
+        print('Second attempt found ${cameras.length} cameras');
+      } catch (e) {
+        print('Second attempt failed: $e');
+        cameras = [];
+      }
+    }
+  } catch (e) {
+    print('Error during camera initialization: $e');
+    cameras = [];
+  }
+  
+  // Run the app after all initialization attempts
   runApp(const MyApp());
 }
 
