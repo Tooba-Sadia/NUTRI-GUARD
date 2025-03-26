@@ -58,43 +58,41 @@ class _ImageViewPageState extends State<ImageViewPage> {
         ],
       ),
       body: SingleChildScrollView(
+        // you can scroll the text
         child: Column(
+          //arranges the text in a column
           children: [
+            //list of widgets displayed in the column
             Image.file(
-              File(widget.imagePath),
-              fit: BoxFit.contain,
+              File(widget.imagePath), //file(): load an image from a file path
+              fit:
+                  BoxFit.contain, // BoxFit.contain: fit the image to the screen
             ),
-            if (_isProcessing)
+            if (_isProcessing) //if the text is being processed, show a circular progress indicator
               const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: CircularProgressIndicator(),
+                padding: EdgeInsets.all(
+                    16.0), //padding around the circular progress indicator
+                child:
+                    CircularProgressIndicator(), //shows a circular loading indicator
               ),
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0), //padding around the text
               child: Text(
-                _recognizedText,
+                _recognizedText, //text to display
                 style: const TextStyle(fontSize: 16),
               ),
             ),
-            if (_recognizedText.isNotEmpty && !_isProcessing)
+            if (_recognizedText.isNotEmpty &&
+                !_isProcessing) //loads the next button
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton.icon(
                   onPressed: () async {
-                    // Delete the image file before navigating
-                    try {
-                      final file = File(widget.imagePath);
-                      if (file.existsSync()) {
-                        await file.delete();
-                      }
-                    } catch (e) {
-                      debugPrint('Error deleting image: $e');
-                    }
-
                     if (mounted) {
-                      Navigator.pushReplacement(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
+                          //animation when navigating to the next screen
                           builder: (context) => AIProcessingScreen(
                             processedText: _recognizedText,
                           ),
