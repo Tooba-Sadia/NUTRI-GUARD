@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'dart:io';
 import 'ai_processing_screen.dart';
+import 'camera_screen.dart';
 
 class ImageViewPage extends StatefulWidget {
   final String imagePath;
@@ -23,24 +24,33 @@ class _ImageViewPageState extends State<ImageViewPage> {
   }
 
   Future<void> _performOCR() async {
+    // First, show loading indicator
     setState(() {
-      _isProcessing = true;
+      _isProcessing = true; // Set processing flag to true
     });
 
     try {
+      // Step 1: Load the image from file path
       final inputImage = InputImage.fromFilePath(widget.imagePath);
+
+      // Step 2: Create a text recognizer for Latin script (English)
       final textRecognizer =
           TextRecognizer(script: TextRecognitionScript.latin);
+
+      // Step 3: Process the image and extract text
+      // await means wait until text extraction is complete
       final recognizedText = await textRecognizer.processImage(inputImage);
 
+      // Step 4: Update the UI with extracted text
       setState(() {
-        _recognizedText = recognizedText.text;
-        _isProcessing = false;
+        _recognizedText = recognizedText.text; // Save the extracted text
+        _isProcessing = false; // Hide loading indicator
       });
     } catch (e) {
+      // If any error occurs during text extraction
       setState(() {
-        _recognizedText = 'Error performing OCR: $e';
-        _isProcessing = false;
+        _recognizedText = 'Error performing OCR: $e'; // Show error message
+        _isProcessing = false; // Hide loading indicator
       });
     }
   }
@@ -77,38 +87,70 @@ class _ImageViewPageState extends State<ImageViewPage> {
               ),
             Padding(
               padding: const EdgeInsets.all(16.0), //padding around the text
-              child: Text(
-                _recognizedText, //text to display
-                style: const TextStyle(fontSize: 16),
-              ),
             ),
             if (_recognizedText.isNotEmpty &&
                 !_isProcessing) //loads the next button
               Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    if (mounted) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          //animation when navigating to the next screen
-                          builder: (context) => AIProcessingScreen(
-                            processedText: _recognizedText,
-                          ),
+                child: Column(
+                  children: [
+                    // Retake Button
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        if (mounted) {
+                          // Delete the current image
+                          final file = File(widget.imagePath);
+                          if (await file.exists()) {
+                            await file.delete();
+                          }
+                          // Go back to camera screen
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const CameraScreen(),
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.camera_alt),
+                      label: const Text('Retake Picture'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
                         ),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Next'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
+                        minimumSize: const Size(double.infinity, 50),
+                        backgroundColor:
+                            Colors.grey, // Different color for retake button
+                      ),
                     ),
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
+                    const SizedBox(height: 16), // Space between buttons
+
+                    // Existing Next Button
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        if (mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AIProcessingScreen(
+                                processedText: _recognizedText,
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.arrow_forward),
+                      label: const Text('Next'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                        minimumSize: const Size(double.infinity, 50),
+                      ),
+                    ),
+                  ],
                 ),
               ),
           ],
