@@ -1,149 +1,216 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../routes/app_router.dart';
+import '../theme/app_theme.dart';
 
 class AIProcessingScreen extends StatefulWidget {
-  final String processedText;
+  final String text;
 
-  const AIProcessingScreen({
-    super.key,
-    required this.processedText,
-  });
+  const AIProcessingScreen({super.key, required this.text});
 
   @override
-  State<AIProcessingScreen> createState() => _AIProcessingScreenState();
+  _AIProcessingScreenState createState() => _AIProcessingScreenState();
 }
 
 class _AIProcessingScreenState extends State<AIProcessingScreen> {
-  bool _isProcessing = false;
-  String _aiResult = '';
-  String _error = '';
+  bool _isProcessing = true;
+  String _result = '';
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _processWithAI();
+    _processText();
   }
 
-  Future<void> _processWithAI() async {
-    setState(() {
-      _isProcessing = true;
-      _error = '';
-    });
-
+  Future<void> _processText() async {
     try {
-      // TODOoo: Add your AI model processing here
-      // For example:
-      // final result = await yourAIModel.process(widget.processedText);
-
-      // Simulating AI processing delay
+      // Simulate AI processing
       await Future.delayed(const Duration(seconds: 2));
-
-      // Temporary result for demonstration
-      final result =
-          "AI Analysis Result:\n1. Text Length: ${widget.processedText.length} characters\n2. Word Count: ${widget.processedText.split(' ').length} words\n3. Sentiment: Positive\n4. Key Topics: Health, Nutrition";
-
-      setState(() {
-        _aiResult = result;
-        _isProcessing = false;
-      });
+      
+      if (mounted) {
+        setState(() {
+          _result = 'Based on the nutritional information:\n\n'
+              '• This product appears to be a processed food item.\n'
+              '• Contains moderate levels of sodium and sugar.\n'
+              '• Recommended to consume in moderation.\n'
+              '• Consider healthier alternatives with lower sodium content.';
+          _isProcessing = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _error = 'Error processing with AI: $e';
-        _isProcessing = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isProcessing = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('AI Processing'),
+        title: const Text(
+          'AI Analysis',
+          style: AppTheme.headingStyle,
+        ),
+        backgroundColor: AppTheme.primaryColor,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => context.go(AppRoutes.bottomNav),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _isProcessing ? null : _processWithAI,
-          ),
-        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Input Text:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              widget.processedText,
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 24),
-            if (_isProcessing)
-              const Center(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppTheme.primaryColor,
+              AppTheme.backgroundColor,
+            ],
+          ),
+        ),
+        child: _isProcessing
+            ? Center(
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
+                    const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                    const SizedBox(height: 24),
                     Text(
-                      'Processing with AI...',
-                      style: TextStyle(fontSize: 16),
+                      'Analyzing nutritional information...',
+                      style: AppTheme.subheadingStyle.copyWith(
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
-              ),
-            if (_error.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  _error,
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 16,
+              )
+            : _error != null
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline_rounded,
+                          size: 64,
+                          color: AppTheme.errorColor,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Error analyzing text',
+                          style: AppTheme.subheadingStyle.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _error!,
+                          style: AppTheme.bodyStyle.copyWith(
+                            color: Colors.white70,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: _processText,
+                          style: AppTheme.primaryButtonStyle,
+                          child: const Text('Try Again'),
+                        ),
+                      ],
+                    ),
+                  )
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Original Text',
+                                style: AppTheme.subheadingStyle.copyWith(
+                                  color: AppTheme.primaryColor,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                widget.text,
+                                style: AppTheme.bodyStyle,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'AI Analysis',
+                                style: AppTheme.subheadingStyle.copyWith(
+                                  color: AppTheme.primaryColor,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _result,
+                                style: AppTheme.bodyStyle,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: () => context.go(AppRoutes.bottomNav),
+                          style: AppTheme.accentButtonStyle,
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                            child: Text(
+                              'Back to Home',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ),
-            if (_aiResult.isNotEmpty) ...[
-              const Text(
-                'AI Analysis Result:',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _aiResult,
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () {
-                  context.go(AppRoutes.camera);
-                },
-                icon: const Icon(Icons.camera_alt),
-                label: const Text('Capture Another Picture'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-              ),
-            ],
-          ],
-        ),
       ),
     );
   }

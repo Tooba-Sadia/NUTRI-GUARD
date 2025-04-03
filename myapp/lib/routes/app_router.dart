@@ -57,7 +57,7 @@ class AppRouter {
           final text = state.pathParameters['text'] ?? '';
           final decodedText = Uri.decodeComponent(text);
           return AIProcessingScreen(
-            processedText: decodedText,
+            text: decodedText,
           );
         },
       ),

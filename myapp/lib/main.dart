@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'routes/app_router.dart';
 import 'dart:async';
+import 'theme/app_theme.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -34,7 +35,7 @@ Future<void> main() async {
       }
     }
   } catch (e) {
-    print('Error during camera initialization: $e');
+    print('Error during camera initialization: $e'); 
     cameras = [];
   }
   
@@ -50,6 +51,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: AppRouter.router,
+      theme: AppTheme.theme,
+      title: 'NutriGuard',
     );
   }
 }

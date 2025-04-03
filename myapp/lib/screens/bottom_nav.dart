@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../routes/app_router.dart';
+import '../theme/app_theme.dart';
 
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});
@@ -33,37 +34,111 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const Center(
-        child: Text('Select a tab from the bottom navigation bar'),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppTheme.backgroundColor,
+              AppTheme.backgroundColor.withOpacity(0.8),
+            ],
+          ),
+        ),
+        child: const Center(
+          child: Text(
+            'Select a tab from the bottom navigation bar',
+            style: AppTheme.bodyStyle,
+          ),
+        ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Colors.green,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera),
-            label: 'Scan',
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.restaurant),
-            label: 'Recipes',
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            selectedItemColor: AppTheme.primaryColor,
+            unselectedItemColor: AppTheme.textSecondaryColor,
+            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
+            items: [
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.home_rounded,
+                  size: 24,
+                ),
+                activeIcon: Icon(
+                  Icons.home_rounded,
+                  size: 28,
+                ),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.camera_alt_rounded,
+                  size: 24,
+                ),
+                activeIcon: Icon(
+                  Icons.camera_alt_rounded,
+                  size: 28,
+                ),
+                label: 'Scan',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.restaurant_rounded,
+                  size: 24,
+                ),
+                activeIcon: Icon(
+                  Icons.restaurant_rounded,
+                  size: 28,
+                ),
+                label: 'Recipes',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.health_and_safety_rounded,
+                  size: 24,
+                ),
+                activeIcon: Icon(
+                  Icons.health_and_safety_rounded,
+                  size: 28,
+                ),
+                label: 'BP Monitor',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.settings_rounded,
+                  size: 24,
+                ),
+                activeIcon: Icon(
+                  Icons.settings_rounded,
+                  size: 28,
+                ),
+                label: 'Settings',
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.health_and_safety),
-            label: 'BP Monitor',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+        ),
       ),
     );
   }

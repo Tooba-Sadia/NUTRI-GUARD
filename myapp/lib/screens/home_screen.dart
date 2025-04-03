@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:go_router/go_router.dart';
 import '../routes/app_router.dart';
 import '../main.dart';
+import '../theme/app_theme.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -47,70 +48,148 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('NutriGuard'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go(AppRoutes.bottomNav),
+      backgroundColor: AppTheme.backgroundColor,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppTheme.primaryColor,
+              AppTheme.backgroundColor,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                Text(
+                  'Welcome to NutriGuard',
+                  style: AppTheme.headingStyle.copyWith(
+                    color: Colors.white,
+                    fontSize: 28,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Your personal nutrition assistant',
+                  style: AppTheme.subheadingStyle.copyWith(
+                    color: Colors.white70,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                _buildFeatureCard(
+                  context,
+                  'Scan Food Labels',
+                  'Take a photo of food labels to analyze nutritional content',
+                  Icons.camera_alt_rounded,
+                  AppRoutes.camera,
+                ),
+                const SizedBox(height: 16),
+                _buildFeatureCard(
+                  context,
+                  'Recipe Recommendations',
+                  'Get personalized recipe suggestions based on your preferences',
+                  Icons.restaurant_rounded,
+                  AppRoutes.recipe,
+                ),
+                const SizedBox(height: 16),
+                _buildFeatureCard(
+                  context,
+                  'BP Monitor',
+                  'Track and monitor your blood pressure readings',
+                  Icons.health_and_safety_rounded,
+                  AppRoutes.bpMonitor,
+                ),
+                const SizedBox(height: 16),
+                _buildFeatureCard(
+                  context,
+                  'Settings',
+                  'Customize your app preferences and notifications',
+                  Icons.settings_rounded,
+                  AppRoutes.settings,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Welcome to NutriGuard',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 40),
-              Card(
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+    );
+  }
+
+  Widget _buildFeatureCard(
+    BuildContext context,
+    String title,
+    String description,
+    IconData icon,
+    String route,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.go(route),
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryLightColor,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: AppTheme.primaryColor,
+                    size: 30,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Camera Status:',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      const SizedBox(height: 10),
                       Text(
-                        _cameraStatus,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: _cameraStatus.contains('Error') || _cameraStatus.contains('No cameras')
-                              ? Colors.red
-                              : Colors.green,
+                        title,
+                        style: AppTheme.subheadingStyle.copyWith(
+                          color: AppTheme.primaryColor,
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: _isChecking ? null : _checkCameras,
-                        child: _isChecking
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Text('Check Cameras'),
+                      const SizedBox(height: 4),
+                      Text(
+                        description,
+                        style: AppTheme.bodyStyle.copyWith(
+                          color: AppTheme.textSecondaryColor,
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 40),
-              ElevatedButton.icon(
-                onPressed: () => context.push(AppRoutes.camera),
-                icon: const Icon(Icons.camera_alt),
-                label: const Text('Open Camera'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  minimumSize: const Size(200, 50),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: AppTheme.textSecondaryColor,
+                  size: 20,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import '../routes/app_router.dart';
+import '../theme/app_theme.dart';
 
 class ImageViewPage extends StatefulWidget {
   final String imagePath;
@@ -10,166 +11,208 @@ class ImageViewPage extends StatefulWidget {
   const ImageViewPage({super.key, required this.imagePath});
 
   @override
-  State<ImageViewPage> createState() => _ImageViewPageState();
+  _ImageViewPageState createState() => _ImageViewPageState();
 }
 
 class _ImageViewPageState extends State<ImageViewPage> {
   String _recognizedText = '';
   bool _isProcessing = false;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    print('ImageViewPage initialized with path: ${widget.imagePath}');
-    _performOCR();
+    _processImage();
   }
 
-  Future<void> _performOCR() async {
-    // First, show loading indicator
+  Future<void> _processImage() async {
     setState(() {
-      _isProcessing = true; // Set processing flag to true
+      _isProcessing = true;
+      _error = null;
     });
 
     try {
-      print('Starting OCR on image: ${widget.imagePath}');
+      debugPrint('Processing image: ${widget.imagePath}');
       
-      // Check if file exists
       final file = File(widget.imagePath);
       if (!await file.exists()) {
-        print('Error: Image file does not exist at path: ${widget.imagePath}');
+        throw Exception('Image file not found');
+      }
+
+      final inputImage = InputImage.fromFile(file);
+      debugPrint('Created InputImage from file');
+
+      final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+      debugPrint('Created text recognizer');
+
+      final recognizedText = await textRecognizer.processImage(inputImage);
+      debugPrint('OCR completed. Text: ${recognizedText.text}');
+
+      if (mounted) {
         setState(() {
-          _recognizedText = 'Error: Image file not found';
+          _recognizedText = recognizedText.text;
           _isProcessing = false;
         });
-        return;
       }
-      
-      // Step 1: Load the image from file path
-      final inputImage = InputImage.fromFilePath(widget.imagePath);
-      print('Input image created successfully');
 
-      // Step 2: Create a text recognizer for Latin script (English)
-      final textRecognizer =
-          TextRecognizer(script: TextRecognitionScript.latin);
-      print('Text recognizer created');
-
-      // Step 3: Process the image and extract text
-      // await means wait until text extraction is complete
-      final recognizedText = await textRecognizer.processImage(inputImage);
-      print('OCR completed with text: ${recognizedText.text}');
-
-      // Step 4: Update the UI with extracted text
-      setState(() {
-        _recognizedText = recognizedText.text; // Save the extracted text
-        _isProcessing = false; // Hide loading indicator
-      });
+      textRecognizer.close();
     } catch (e) {
-      // If any error occurs during text extraction
-      print('Error during OCR: $e');
-      setState(() {
-        _recognizedText = 'Error performing OCR: $e'; // Show error message
-        _isProcessing = false; // Hide loading indicator
-      });
+      debugPrint('Error processing image: $e');
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isProcessing = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('Image View'),
+        title: const Text(
+          'Scan Results',
+          style: AppTheme.headingStyle,
+        ),
+        backgroundColor: AppTheme.primaryColor,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go(AppRoutes.camera),
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => context.go(AppRoutes.bottomNav),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _isProcessing ? null : _performOCR,
-          ),
-        ],
       ),
-      body: SingleChildScrollView(
-        // you can scroll the text
-        child: Column(
-          //arranges the text in a column
-          children: [
-            //list of widgets displayed in the column
-            Image.file(
-              File(widget.imagePath), //file(): load an image from a file path
-              fit:
-                  BoxFit.contain, // BoxFit.contain: fit the image to the screen
-            ),
-            if (_isProcessing) //if the text is being processed, show a circular progress indicator
-              const Padding(
-                padding: EdgeInsets.all(
-                    16.0), //padding around the circular progress indicator
-                child:
-                    CircularProgressIndicator(), //shows a circular loading indicator
-              ),
-            Padding(
-              padding: const EdgeInsets.all(16.0), //padding around the text
-              child: Text(
-                _recognizedText.isEmpty ? 'No text recognized yet' : _recognizedText,
-                style: const TextStyle(fontSize: 16),
-              ),
-            ),
-            if (_recognizedText.isNotEmpty &&
-                !_isProcessing) //loads the next button
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    // Retake Button
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        if (mounted) {
-                          // Delete the current image
-                          final file = File(widget.imagePath);
-                          if (await file.exists()) {
-                            await file.delete();
-                          }
-                          // Go back to camera screen
-                          context.go(AppRoutes.camera);
-                        }
-                      },
-                      icon: const Icon(Icons.camera_alt),
-                      label: const Text('Retake Picture'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 16,
-                        ),
-                        minimumSize: const Size(double.infinity, 50),
-                        backgroundColor:
-                            Colors.grey, // Different color for retake button
-                      ),
-                    ),
-                    const SizedBox(height: 16), // Space between buttons
-
-                    // Existing Next Button
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        if (mounted) {
-                          // Use GoRouter to navigate to AI processing screen
-                          context.go('${AppRoutes.aiProcessing}/${Uri.encodeComponent(_recognizedText)}');
-                        }
-                      },
-                      icon: const Icon(Icons.arrow_forward),
-                      label: const Text('Next'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 16,
-                        ),
-                        minimumSize: const Size(double.infinity, 50),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppTheme.primaryColor,
+              AppTheme.backgroundColor,
+            ],
+          ),
         ),
+        child: _isProcessing
+            ? const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : _error != null
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline_rounded,
+                          size: 64,
+                          color: AppTheme.errorColor,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Error processing image',
+                          style: AppTheme.subheadingStyle.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _error!,
+                          style: AppTheme.bodyStyle.copyWith(
+                            color: Colors.white70,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: _processImage,
+                          style: AppTheme.primaryButtonStyle,
+                          child: const Text('Try Again'),
+                        ),
+                      ],
+                    ),
+                  )
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Container(
+                          height: 200,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Image.file(
+                              File(widget.imagePath),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Recognized Text',
+                                style: AppTheme.subheadingStyle.copyWith(
+                                  color: AppTheme.primaryColor,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _recognizedText.isEmpty
+                                    ? 'No text was recognized'
+                                    : _recognizedText,
+                                style: AppTheme.bodyStyle,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: () {
+                            final encodedText = Uri.encodeComponent(_recognizedText);
+                            context.go('${AppRoutes.aiProcessing}/$encodedText');
+                          },
+                          style: AppTheme.accentButtonStyle,
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                            child: Text(
+                              'Analyze with AI',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
       ),
     );
   }

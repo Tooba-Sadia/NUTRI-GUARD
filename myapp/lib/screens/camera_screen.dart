@@ -1,53 +1,56 @@
 // lib/screens/camera_screen.dart
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import '../routes/app_router.dart';
+import '../theme/app_theme.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
 
   @override
-  State<CameraScreen> createState() => _CameraScreenState();
+  _CameraScreenState createState() => _CameraScreenState();
 }
 
 class _CameraScreenState extends State<CameraScreen> {
   final ImagePicker _picker = ImagePicker();
-  bool _isProcessing = false;
+  bool _isLoading = false;
 
   Future<void> _captureImage() async {
-    if (_isProcessing) return;
-
     try {
       setState(() {
-        _isProcessing = true;
+        _isLoading = true;
       });
 
-      // Capture image using image picker
-      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 100,
+      );
 
       if (image != null) {
         final String imagePath = image.path;
+        final String encodedPath = Uri.encodeComponent(imagePath);
         
-        // Debug print to verify the image path
-        print('Captured image path: $imagePath');
-
-        if (mounted) {
-          // Properly encode the image path for URL
-          final encodedPath = Uri.encodeComponent(imagePath);
-          print('Encoded path: $encodedPath');
-          
-          // Use GoRouter to navigate to the image view page
-          context.go('${AppRoutes.imageView}/$encodedPath');
-        }
+        debugPrint('Captured image path: $imagePath');
+        debugPrint('Encoded path: $encodedPath');
+        
+        if (!mounted) return;
+        context.go('${AppRoutes.imageView}/$encodedPath');
       }
     } catch (e) {
-      print('Error capturing image: $e');
+      debugPrint('Error capturing image: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error capturing image: $e'),
+          backgroundColor: AppTheme.errorColor,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() {
-          _isProcessing = false;
+          _isLoading = false;
         });
       }
     }
@@ -56,17 +59,85 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('Camera'),
+        title: const Text(
+          'Scan Food Label',
+          style: AppTheme.headingStyle,
+        ),
+        backgroundColor: AppTheme.primaryColor,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => context.go(AppRoutes.bottomNav),
         ),
       ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: _isProcessing ? null : _captureImage,
-          child: const Text('Capture Image'),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppTheme.primaryColor,
+              AppTheme.backgroundColor,
+            ],
+          ),
+        ),
+        child: Center(
+          child: _isLoading
+              ? const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.camera_alt_rounded,
+                        size: 80,
+                        color: AppTheme.primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    Text(
+                      'Tap to scan food label',
+                      style: AppTheme.subheadingStyle.copyWith(
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _captureImage,
+                      style: AppTheme.primaryButtonStyle,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 30,
+                          vertical: 15,
+                        ),
+                        child: Text(
+                          'Take Photo',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );
