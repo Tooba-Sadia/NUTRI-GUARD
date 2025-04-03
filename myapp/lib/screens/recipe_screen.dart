@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../routes/app_router.dart';
 
 class RecipeRecommendationScreen extends StatelessWidget {
   final List<String> recipes = [
@@ -15,6 +17,10 @@ class RecipeRecommendationScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recipe Recommendations'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go(AppRoutes.bottomNav),
+        ),
       ),
       body: ListView.builder(
         itemCount: recipes.length,

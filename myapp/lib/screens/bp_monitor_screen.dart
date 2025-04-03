@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../routes/app_router.dart';
 
 class BPMonitorScreen extends StatelessWidget {
   const BPMonitorScreen({super.key});
@@ -8,6 +10,10 @@ class BPMonitorScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Blood Pressure Monitor'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go(AppRoutes.bottomNav),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

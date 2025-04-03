@@ -49,6 +49,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('NutriGuard'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go(AppRoutes.bottomNav),
+        ),
       ),
       body: Center(
         child: Padding(

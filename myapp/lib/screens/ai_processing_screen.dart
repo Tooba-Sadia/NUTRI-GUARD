@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'camera_screen.dart';
+import 'package:go_router/go_router.dart';
+import '../routes/app_router.dart';
 
 class AIProcessingScreen extends StatefulWidget {
   final String processedText;
@@ -59,6 +60,10 @@ class _AIProcessingScreenState extends State<AIProcessingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('AI Processing'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go(AppRoutes.bottomNav),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -124,12 +129,7 @@ class _AIProcessingScreenState extends State<AIProcessingScreen> {
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CameraScreen(),
-                    ),
-                  );
+                  context.go(AppRoutes.camera);
                 },
                 icon: const Icon(Icons.camera_alt),
                 label: const Text('Capture Another Picture'),

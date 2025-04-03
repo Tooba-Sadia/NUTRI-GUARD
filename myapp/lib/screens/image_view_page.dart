@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'dart:io';
-import 'ai_processing_screen.dart';
-import 'camera_screen.dart';
+import 'package:go_router/go_router.dart';
+import '../routes/app_router.dart';
 
 class ImageViewPage extends StatefulWidget {
   final String imagePath;
@@ -20,6 +20,7 @@ class _ImageViewPageState extends State<ImageViewPage> {
   @override
   void initState() {
     super.initState();
+    print('ImageViewPage initialized with path: ${widget.imagePath}');
     _performOCR();
   }
 
@@ -30,16 +31,32 @@ class _ImageViewPageState extends State<ImageViewPage> {
     });
 
     try {
+      print('Starting OCR on image: ${widget.imagePath}');
+      
+      // Check if file exists
+      final file = File(widget.imagePath);
+      if (!await file.exists()) {
+        print('Error: Image file does not exist at path: ${widget.imagePath}');
+        setState(() {
+          _recognizedText = 'Error: Image file not found';
+          _isProcessing = false;
+        });
+        return;
+      }
+      
       // Step 1: Load the image from file path
       final inputImage = InputImage.fromFilePath(widget.imagePath);
+      print('Input image created successfully');
 
       // Step 2: Create a text recognizer for Latin script (English)
       final textRecognizer =
           TextRecognizer(script: TextRecognitionScript.latin);
+      print('Text recognizer created');
 
       // Step 3: Process the image and extract text
       // await means wait until text extraction is complete
       final recognizedText = await textRecognizer.processImage(inputImage);
+      print('OCR completed with text: ${recognizedText.text}');
 
       // Step 4: Update the UI with extracted text
       setState(() {
@@ -48,6 +65,7 @@ class _ImageViewPageState extends State<ImageViewPage> {
       });
     } catch (e) {
       // If any error occurs during text extraction
+      print('Error during OCR: $e');
       setState(() {
         _recognizedText = 'Error performing OCR: $e'; // Show error message
         _isProcessing = false; // Hide loading indicator
@@ -60,6 +78,10 @@ class _ImageViewPageState extends State<ImageViewPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Image View'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go(AppRoutes.camera),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -87,6 +109,10 @@ class _ImageViewPageState extends State<ImageViewPage> {
               ),
             Padding(
               padding: const EdgeInsets.all(16.0), //padding around the text
+              child: Text(
+                _recognizedText.isEmpty ? 'No text recognized yet' : _recognizedText,
+                style: const TextStyle(fontSize: 16),
+              ),
             ),
             if (_recognizedText.isNotEmpty &&
                 !_isProcessing) //loads the next button
@@ -104,12 +130,7 @@ class _ImageViewPageState extends State<ImageViewPage> {
                             await file.delete();
                           }
                           // Go back to camera screen
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const CameraScreen(),
-                            ),
-                          );
+                          context.go(AppRoutes.camera);
                         }
                       },
                       icon: const Icon(Icons.camera_alt),
@@ -130,14 +151,8 @@ class _ImageViewPageState extends State<ImageViewPage> {
                     ElevatedButton.icon(
                       onPressed: () async {
                         if (mounted) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AIProcessingScreen(
-                                processedText: _recognizedText,
-                              ),
-                            ),
-                          );
+                          // Use GoRouter to navigate to AI processing screen
+                          context.go('${AppRoutes.aiProcessing}/${Uri.encodeComponent(_recognizedText)}');
                         }
                       },
                       icon: const Icon(Icons.arrow_forward),

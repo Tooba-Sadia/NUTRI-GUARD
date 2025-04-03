@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/screens/home_screen.dart';
-import 'package:myapp/screens/recipe_screen.dart';
-import 'package:myapp/screens/camera_screen.dart';
-import 'package:myapp/screens/bp_monitor_screen.dart';
-import 'package:myapp/screens/settings_screen.dart';
+import 'package:go_router/go_router.dart';
+import '../routes/app_router.dart';
 
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});
@@ -15,24 +12,30 @@ class BottomNavScreen extends StatefulWidget {
 class _BottomNavScreenState extends State<BottomNavScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const CameraScreen(),
-    RecipeRecommendationScreen(),
-    const BPMonitorScreen(),
-    const SettingsScreen(),
+  // Define the routes for each tab
+  final List<String> _routes = [
+    AppRoutes.home,
+    AppRoutes.camera,
+    AppRoutes.recipe,
+    AppRoutes.bpMonitor,
+    AppRoutes.settings,
   ];
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+    
+    // Navigate to the selected route
+    context.go(_routes[index]);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: const Center(
+        child: Text('Select a tab from the bottom navigation bar'),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
