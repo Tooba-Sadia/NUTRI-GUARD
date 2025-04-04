@@ -11,10 +11,10 @@ class ImageViewPage extends StatefulWidget {
   const ImageViewPage({super.key, required this.imagePath});
 
   @override
-  _ImageViewPageState createState() => _ImageViewPageState();
+  ImageViewPageState createState() => ImageViewPageState();
 }
 
-class _ImageViewPageState extends State<ImageViewPage> {
+class ImageViewPageState extends State<ImageViewPage> {
   String _recognizedText = '';
   bool _isProcessing = false;
   String? _error;
@@ -33,7 +33,7 @@ class _ImageViewPageState extends State<ImageViewPage> {
 
     try {
       debugPrint('Processing image: ${widget.imagePath}');
-      
+
       final file = File(widget.imagePath);
       if (!await file.exists()) {
         throw Exception('Image file not found');
@@ -42,7 +42,8 @@ class _ImageViewPageState extends State<ImageViewPage> {
       final inputImage = InputImage.fromFile(file);
       debugPrint('Created InputImage from file');
 
-      final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+      final textRecognizer =
+          TextRecognizer(script: TextRecognitionScript.latin);
       debugPrint('Created text recognizer');
 
       final recognizedText = await textRecognizer.processImage(inputImage);
@@ -195,8 +196,10 @@ class _ImageViewPageState extends State<ImageViewPage> {
                         const SizedBox(height: 24),
                         ElevatedButton(
                           onPressed: () {
-                            final encodedText = Uri.encodeComponent(_recognizedText);
-                            context.go('${AppRoutes.aiProcessing}/$encodedText');
+                            final encodedText =
+                                Uri.encodeComponent(_recognizedText);
+                            context
+                                .go('${AppRoutes.aiProcessing}/$encodedText');
                           },
                           style: AppTheme.accentButtonStyle,
                           child: const Padding(

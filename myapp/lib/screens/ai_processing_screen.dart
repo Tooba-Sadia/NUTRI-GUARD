@@ -6,13 +6,14 @@ import '../theme/app_theme.dart';
 class AIProcessingScreen extends StatefulWidget {
   final String text;
 
-  const AIProcessingScreen({super.key, required this.text});
+  const AIProcessingScreen(
+      {super.key, required this.text}); // Constructor with required text
 
   @override
-  _AIProcessingScreenState createState() => _AIProcessingScreenState();
+  AIProcessingScreenState createState() => AIProcessingScreenState();
 }
 
-class _AIProcessingScreenState extends State<AIProcessingScreen> {
+class AIProcessingScreenState extends State<AIProcessingScreen> {
   bool _isProcessing = true;
   String _result = '';
   String? _error;
@@ -25,23 +26,30 @@ class _AIProcessingScreenState extends State<AIProcessingScreen> {
 
   Future<void> _processText() async {
     try {
-      // Simulate AI processing
-      await Future.delayed(const Duration(seconds: 2));
-      
-      if (mounted) {
-        setState(() {
-          _result = 'Based on the nutritional information:\n\n'
-              '• This product appears to be a processed food item.\n'
-              '• Contains moderate levels of sodium and sugar.\n'
-              '• Recommended to consume in moderation.\n'
-              '• Consider healthier alternatives with lower sodium content.';
-          _isProcessing = false;
-        });
-      }
+      // Simulate AI processing with a timeout
+      await Future.any([
+        Future.delayed(const Duration(seconds: 2), () {
+          // After 2 seconds, set the result and update the processing flag
+          setState(() {
+            _result = 'Based on the nutritional information:\n\n'
+                '• This product appears to be a processed food item.\n'
+                '• Contains moderate levels of sodium and sugar.\n'
+                '• Recommended to consume in moderation.\n'
+                '• Consider healthier alternatives with lower sodium content.';
+            _isProcessing = false; // Mark processing as complete
+          });
+        }),
+        Future.delayed(const Duration(seconds: 10), () {
+          // If processing takes too long, throw an error
+          throw Exception('Processing took too long. Please try again.');
+        }),
+      ]);
     } catch (e) {
+      // Handle any errors that occur during processing
       if (mounted) {
+        // Check if the widget is still mounted
         setState(() {
-          _error = e.toString();
+          _error = e.toString(); // Display the error message
           _isProcessing = false;
         });
       }
@@ -57,8 +65,8 @@ class _AIProcessingScreenState extends State<AIProcessingScreen> {
           'AI Analysis',
           style: AppTheme.headingStyle,
         ),
-        backgroundColor: AppTheme.primaryColor,
-        elevation: 0,
+        backgroundColor: AppTheme.primaryColor, // App bar background color
+        elevation: 0, // No shadow under the app bar
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => context.go(AppRoutes.bottomNav),
@@ -78,14 +86,17 @@ class _AIProcessingScreenState extends State<AIProcessingScreen> {
         child: _isProcessing
             ? Center(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment:
+                      MainAxisAlignment.center, // Center the content vertically
                   children: [
                     const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.white), // Loading indicator color
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(
+                        height: 24), // Space between the indicator and text
                     Text(
-                      'Analyzing nutritional information...',
+                      'Analyzing nutritional information...', // Loading message
                       style: AppTheme.subheadingStyle.copyWith(
                         color: Colors.white,
                       ),
@@ -99,11 +110,12 @@ class _AIProcessingScreenState extends State<AIProcessingScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.error_outline_rounded,
+                          Icons.error_outline_rounded, // Error icon
                           size: 64,
                           color: AppTheme.errorColor,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(
+                            height: 16), // Space between icon and text
                         Text(
                           'Error analyzing text',
                           style: AppTheme.subheadingStyle.copyWith(
@@ -120,7 +132,13 @@ class _AIProcessingScreenState extends State<AIProcessingScreen> {
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton(
-                          onPressed: _processText,
+                          onPressed: () {
+                            setState(() {
+                              _isProcessing = true; // Reset processing state
+                              _error = null; // Clear error message
+                            });
+                            _processText(); // Retry processing
+                          },
                           style: AppTheme.primaryButtonStyle,
                           child: const Text('Try Again'),
                         ),
@@ -130,10 +148,12 @@ class _AIProcessingScreenState extends State<AIProcessingScreen> {
                 : SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      crossAxisAlignment: CrossAxisAlignment
+                          .stretch, // Stretch the column to fill the width
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(
+                              16), // Padding inside the card
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),

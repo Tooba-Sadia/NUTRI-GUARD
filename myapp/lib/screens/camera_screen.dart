@@ -10,10 +10,10 @@ class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
 
   @override
-  _CameraScreenState createState() => _CameraScreenState();
+  CameraScreenState createState() => CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> {
+class CameraScreenState extends State<CameraScreen> {
   final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
 
@@ -31,10 +31,10 @@ class _CameraScreenState extends State<CameraScreen> {
       if (image != null) {
         final String imagePath = image.path;
         final String encodedPath = Uri.encodeComponent(imagePath);
-        
+
         debugPrint('Captured image path: $imagePath');
         debugPrint('Encoded path: $encodedPath');
-        
+
         if (!mounted) return;
         context.go('${AppRoutes.imageView}/$encodedPath');
       }

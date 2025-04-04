@@ -9,42 +9,12 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  HomeScreenState createState() =>
+      HomeScreenState(); // Create state for HomeScreen
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  String _cameraStatus = 'Not checked';
-  bool _isChecking = false;
-
-  Future<void> _checkCameras() async {
-    setState(() {
-      _isChecking = true;
-      _cameraStatus = 'Checking cameras...';
-    });
-
-    try {
-      final availableCams = await availableCameras();
-      if (availableCams.isNotEmpty) {
-        cameras = availableCams;
-        setState(() {
-          _cameraStatus = 'Found ${cameras.length} cameras';
-        });
-      } else {
-        setState(() {
-          _cameraStatus = 'No cameras found';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _cameraStatus = 'Error: $e';
-      });
-    } finally {
-      setState(() {
-        _isChecking = false;
-      });
-    }
-  }
-
+// State class for HomeScreen
+class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,20 +25,20 @@ class _HomeScreenState extends State<HomeScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppTheme.primaryColor,
-              AppTheme.backgroundColor,
+              AppTheme.primaryColor, // gradient Top color
+              AppTheme.backgroundColor, // gradient Bottom color
             ],
           ),
         ),
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16), // Padding around the content
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
                 Text(
-                  'Welcome to NutriGuard',
+                  'Welcome to NutriGuard', // Welcome message
                   style: AppTheme.headingStyle.copyWith(
                     color: Colors.white,
                     fontSize: 28,
@@ -76,12 +46,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Your personal nutrition assistant',
+                  'Your personal nutrition assistant', // Subtitle
                   style: AppTheme.subheadingStyle.copyWith(
                     color: Colors.white70,
                   ),
                 ),
                 const SizedBox(height: 32),
+                // Feature cards for different functionalities
                 _buildFeatureCard(
                   context,
                   'Scan Food Labels',
@@ -121,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Method to build feature cards
   Widget _buildFeatureCard(
     BuildContext context,
     String title,
@@ -130,11 +102,11 @@ class _HomeScreenState extends State<HomeScreen> {
   ) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white, // Card background color
+        borderRadius: BorderRadius.circular(20), // Rounded corners
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.1), // Shadow effect
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -143,12 +115,13 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => context.go(route),
+          onTap: () => context.go(route), // Navigate to the specified route
           borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16), // Padding inside the card
             child: Row(
               children: [
+                // Icon for the feature
                 Container(
                   width: 60,
                   height: 60,
@@ -162,20 +135,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     size: 30,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 16), // Space between icon and text
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
+                        title, // Feature title
                         style: AppTheme.subheadingStyle.copyWith(
                           color: AppTheme.primaryColor,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(
+                          height: 4), // Space between title and description
                       Text(
-                        description,
+                        description, // Feature description
                         style: AppTheme.bodyStyle.copyWith(
                           color: AppTheme.textSecondaryColor,
                         ),
@@ -183,6 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
+                // Arrow icon to indicate navigation
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   color: AppTheme.textSecondaryColor,

@@ -7,10 +7,10 @@ class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});
 
   @override
-  _BottomNavScreenState createState() => _BottomNavScreenState();
+  BottomNavScreenState createState() => BottomNavScreenState();
 }
 
-class _BottomNavScreenState extends State<BottomNavScreen> {
+class BottomNavScreenState extends State<BottomNavScreen> {
   int _selectedIndex = 0;
 
   // Define the routes for each tab
@@ -26,7 +26,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     setState(() {
       _selectedIndex = index;
     });
-    
+
     // Navigate to the selected route
     context.go(_routes[index]);
   }
@@ -79,7 +79,8 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
             selectedItemColor: AppTheme.primaryColor,
             unselectedItemColor: AppTheme.textSecondaryColor,
             selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
+            unselectedLabelStyle:
+                const TextStyle(fontWeight: FontWeight.normal),
             items: [
               BottomNavigationBarItem(
                 icon: Icon(

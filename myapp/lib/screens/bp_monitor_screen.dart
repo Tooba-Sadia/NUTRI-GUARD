@@ -7,10 +7,10 @@ class BPMonitorScreen extends StatefulWidget {
   const BPMonitorScreen({super.key});
 
   @override
-  _BPMonitorScreenState createState() => _BPMonitorScreenState();
+  BPMonitorScreenState createState() => BPMonitorScreenState();
 }
 
-class _BPMonitorScreenState extends State<BPMonitorScreen> {
+class BPMonitorScreenState extends State<BPMonitorScreen> {
   final List<BPReading> _readings = [
     BPReading(
       systolic: 120,

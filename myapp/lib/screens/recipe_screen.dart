@@ -7,14 +7,17 @@ class RecipeRecommendationScreen extends StatefulWidget {
   const RecipeRecommendationScreen({super.key});
 
   @override
-  _RecipeRecommendationScreenState createState() => _RecipeRecommendationScreenState();
+  RecipeRecommendationScreenState createState() =>
+      RecipeRecommendationScreenState();
 }
 
-class _RecipeRecommendationScreenState extends State<RecipeRecommendationScreen> {
+class RecipeRecommendationScreenState
+    extends State<RecipeRecommendationScreen> {
   final List<Recipe> _recipes = [
     Recipe(
       name: 'Mediterranean Salad',
-      description: 'A healthy and refreshing salad with fresh vegetables and olive oil dressing',
+      description:
+          'A healthy and refreshing salad with fresh vegetables and olive oil dressing',
       calories: 320,
       prepTime: '15 mins',
       imageUrl: 'https://example.com/mediterranean-salad.jpg',
@@ -31,7 +34,8 @@ class _RecipeRecommendationScreenState extends State<RecipeRecommendationScreen>
     ),
     Recipe(
       name: 'Grilled Chicken Bowl',
-      description: 'Protein-rich bowl with grilled chicken, quinoa, and roasted vegetables',
+      description:
+          'Protein-rich bowl with grilled chicken, quinoa, and roasted vegetables',
       calories: 450,
       prepTime: '25 mins',
       imageUrl: 'https://example.com/chicken-bowl.jpg',
@@ -47,7 +51,8 @@ class _RecipeRecommendationScreenState extends State<RecipeRecommendationScreen>
     ),
     Recipe(
       name: 'Vegetable Stir-Fry',
-      description: 'Quick and nutritious stir-fry with colorful vegetables and tofu',
+      description:
+          'Quick and nutritious stir-fry with colorful vegetables and tofu',
       calories: 380,
       prepTime: '20 mins',
       imageUrl: 'https://example.com/stir-fry.jpg',
