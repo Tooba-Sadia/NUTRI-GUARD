@@ -24,8 +24,9 @@ class CameraScreenState extends State<CameraScreen> {
       });
 
       final XFile? image = await _picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 100,
+        //xfile:used w image/file picker
+        source: ImageSource.camera, //can be gallery or camera
+        imageQuality: 100, //100 perc
       );
 
       if (image != null) {
