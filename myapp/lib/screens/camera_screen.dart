@@ -22,26 +22,29 @@ class CameraScreenState extends State<CameraScreen> {
       setState(() {
         _isLoading = true;
       });
-
+      //xfile is used with image / file picker
       final XFile? image = await _picker.pickImage(
-        //xfile:used w image/file picker
+        
         source: ImageSource.camera, //can be gallery or camera
         imageQuality: 100, //100 perc
       );
 
       if (image != null) {
         final String imagePath = image.path;
+        // Encode the image path to make it URL-safe eg space to %20
         final String encodedPath = Uri.encodeComponent(imagePath);
 
         debugPrint('Captured image path: $imagePath');
         debugPrint('Encoded path: $encodedPath');
 
         if (!mounted) return;
+        // Navigate to the image view screen with the encoded path
         context.go('${AppRoutes.imageView}/$encodedPath');
       }
     } catch (e) {
       debugPrint('Error capturing image: $e');
       if (!mounted) return;
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error capturing image: $e'),
@@ -67,7 +70,7 @@ class CameraScreenState extends State<CameraScreen> {
           style: AppTheme.headingStyle,
         ),
         backgroundColor: AppTheme.primaryColor,
-        elevation: 0,
+        elevation: 0,// Remove shadow
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => context.go(AppRoutes.home), // Redirect to Home
