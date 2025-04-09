@@ -113,7 +113,7 @@ Widget build(BuildContext context) {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.go(AppRoutes.bottomNav),
+          onPressed: () => context.go(AppRoutes.home), // Redirect to Home
         ),
       ),
       body: Container(

@@ -22,14 +22,12 @@ class AppRoutes {
 
 class AppRouter {
   static final router = GoRouter(
-    initialLocation: AppRoutes.bottomNav, // Start with bottom navigation
+    initialLocation: AppRoutes.home, // Set the initial route to Home
     routes: [
-      // Bottom navigation as the main route
       GoRoute(
         path: AppRoutes.bottomNav,
         builder: (context, state) => const BottomNavScreen(),
       ),
-      // Individual screen routes
       GoRoute(
         path: AppRoutes.home,
         builder: (context, state) => const HomeScreen(),
@@ -78,7 +76,7 @@ class AppRouter {
         title: const Text('Error'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go(AppRoutes.bottomNav),
+          onPressed: () => context.go(AppRoutes.home), // Redirect to Home
         ),
       ),
       body: Center(
@@ -96,7 +94,7 @@ class AppRouter {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => context.go(AppRoutes.bottomNav),
+              onPressed: () => context.go(AppRoutes.home), // Redirect to Home
               child: const Text('Go to Home'),
             ),
           ],
