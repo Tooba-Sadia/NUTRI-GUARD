@@ -47,6 +47,18 @@ class ImageViewPageState extends State<ImageViewPage> {
       debugPrint('Created text recognizer');
 
       final recognizedText = await textRecognizer.processImage(inputImage);
+      for(final block in recognizedText.blocks) {
+        debugPrint('Block: ${block.text}');
+        for (final line in block.lines) {
+          debugPrint('bbbLine: ${line.text}');
+          for (final element in line.elements) {
+            debugPrint('Element: ${element.text}');
+            _preprocessText(element.text);
+            
+          }
+        }
+      }
+      debugPrint('Text recognition completed successfully.');
       debugPrint('OCR completed. Text: ${recognizedText.text}');
 
       if (mounted) {
@@ -55,6 +67,7 @@ class ImageViewPageState extends State<ImageViewPage> {
           _isProcessing = false;
         });
       }
+      
 
       textRecognizer.close();
     } catch (e) {
@@ -68,8 +81,27 @@ class ImageViewPageState extends State<ImageViewPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  String _preprocessText(String rawText) {
+    // Preprocess the text to remove unwanted characters or format it
+  // Convert to lowercase
+  String cleanText = rawText.toLowerCase();
+
+  // Remove special characters (except commas and spaces)
+  cleanText = cleanText.replaceAll(RegExp(r'[^\w\s,]'), '');
+
+  // Replace multiple spaces or newlines with a single space
+  cleanText = cleanText.replaceAll(RegExp(r'\s+'), ' ');
+
+  // Remove common OCR misreads 
+  cleanText = cleanText.replaceAll('mlik', 'milk');
+  cleanText = cleanText.replaceAll('s0y', 'soy');
+  cleanText = cleanText.replaceAll('whey ', 'whey');
+
+  return cleanText.trim();
+
+  }
+@override
+Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
@@ -95,8 +127,8 @@ class ImageViewPageState extends State<ImageViewPage> {
             ],
           ),
         ),
-        child: _isProcessing
-            ? const Center(
+        child: _isProcessing?
+         const Center(
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
@@ -219,4 +251,6 @@ class ImageViewPageState extends State<ImageViewPage> {
       ),
     );
   }
+  
+
 }
