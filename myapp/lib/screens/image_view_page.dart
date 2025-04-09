@@ -15,46 +15,44 @@ class ImageViewPage extends StatefulWidget {
 }
 
 class ImageViewPageState extends State<ImageViewPage> {
-  String _recognizedText = '';
-  bool _isProcessing = false;
-  String? _error;
+  String _recognizedText = ''; // Holds the recognized text from the image
+  bool _isProcessing = false; // Indicates if the image is being processed
+  String? _error; // Holds any error message during processing
 
   @override
   void initState() {
     super.initState();
-    _processImage();
+    _processImage(); // Start processing the image when the page loads
   }
 
   Future<void> _processImage() async {
     setState(() {
-      _isProcessing = true;
-      _error = null;
+      _isProcessing = true; // Show loading indicator
+      _error = null; // Clear any previous errors
     });
+
+    final textRecognizer =
+        TextRecognizer(script: TextRecognitionScript.latin); // Initialize text recognizer
 
     try {
       debugPrint('Processing image: ${widget.imagePath}');
 
       final file = File(widget.imagePath);
       if (!await file.exists()) {
-        throw Exception('Image file not found');
+        throw Exception('Image file not found'); // Handle missing file
       }
 
-      final inputImage = InputImage.fromFile(file);
+      final inputImage = InputImage.fromFile(file); // Convert file to InputImage
       debugPrint('Created InputImage from file');
 
-      final textRecognizer =
-          TextRecognizer(script: TextRecognitionScript.latin);
-      debugPrint('Created text recognizer');
-
-      final recognizedText = await textRecognizer.processImage(inputImage);
-      for(final block in recognizedText.blocks) {
+      final recognizedText = await textRecognizer.processImage(inputImage); // Perform OCR
+      for (final block in recognizedText.blocks) {
         debugPrint('Block: ${block.text}');
         for (final line in block.lines) {
-          debugPrint('bbbLine: ${line.text}');
+          debugPrint('Line: ${line.text}');
           for (final element in line.elements) {
             debugPrint('Element: ${element.text}');
-            _preprocessText(element.text);
-            
+            _preprocessText(element.text); // Preprocess each text element
           }
         }
       }
@@ -63,45 +61,36 @@ class ImageViewPageState extends State<ImageViewPage> {
 
       if (mounted) {
         setState(() {
-          _recognizedText = recognizedText.text;
-          _isProcessing = false;
+          _recognizedText = recognizedText.text; // Update recognized text
+          _isProcessing = false; // Stop loading indicator
         });
       }
-      
-
-      textRecognizer.close();
     } catch (e) {
       debugPrint('Error processing image: $e');
       if (mounted) {
         setState(() {
-          _error = e.toString();
-          _isProcessing = false;
+          _error = 'Failed to process the image. Please try again.'; // Set error message
+          _isProcessing = false; // Stop loading indicator
         });
       }
+    } finally {
+      textRecognizer.close(); // Ensure the recognizer is closed
     }
   }
 
   String _preprocessText(String rawText) {
     // Preprocess the text to remove unwanted characters or format it
-  // Convert to lowercase
-  String cleanText = rawText.toLowerCase();
-
-  // Remove special characters (except commas and spaces)
-  cleanText = cleanText.replaceAll(RegExp(r'[^\w\s,]'), '');
-
-  // Replace multiple spaces or newlines with a single space
-  cleanText = cleanText.replaceAll(RegExp(r'\s+'), ' ');
-
-  // Remove common OCR misreads 
-  cleanText = cleanText.replaceAll('mlik', 'milk');
-  cleanText = cleanText.replaceAll('s0y', 'soy');
-  cleanText = cleanText.replaceAll('whey ', 'whey');
-
-  return cleanText.trim();
-
+    String cleanText = rawText.toLowerCase(); // Convert to lowercase
+    cleanText = cleanText.replaceAll(RegExp(r'[^\w\s,]'), ''); // Remove special characters
+    cleanText = cleanText.replaceAll(RegExp(r'\s+'), ' '); // Replace multiple spaces with a single space
+    cleanText = cleanText.replaceAll('mlik', 'milk'); // Fix common OCR misreads
+    cleanText = cleanText.replaceAll('s0y', 'soy');
+    cleanText = cleanText.replaceAll('whey ', 'whey');
+    return cleanText.trim(); // Trim leading/trailing spaces
   }
-@override
-Widget build(BuildContext context) {
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
@@ -113,7 +102,9 @@ Widget build(BuildContext context) {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.go(AppRoutes.home), // Redirect to Home
+          onPressed: () {
+            context.go(AppRoutes.home); // Navigate back to the home page
+          },
         ),
       ),
       body: Container(
@@ -127,8 +118,8 @@ Widget build(BuildContext context) {
             ],
           ),
         ),
-        child: _isProcessing?
-         const Center(
+        child: _isProcessing
+            ? const Center(
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
@@ -160,7 +151,7 @@ Widget build(BuildContext context) {
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton(
-                          onPressed: _processImage,
+                          onPressed: _processImage, // Retry processing
                           style: AppTheme.primaryButtonStyle,
                           child: const Text('Try Again'),
                         ),
@@ -193,45 +184,11 @@ Widget build(BuildContext context) {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 10,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Recognized Text',
-                                style: AppTheme.subheadingStyle.copyWith(
-                                  color: AppTheme.primaryColor,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                _recognizedText.isEmpty
-                                    ? 'No text was recognized'
-                                    : _recognizedText,
-                                style: AppTheme.bodyStyle,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
                         ElevatedButton(
                           onPressed: () {
                             final encodedText =
                                 Uri.encodeComponent(_recognizedText);
-                            context
-                                .go('${AppRoutes.aiProcessing}/$encodedText');
+                            context.go('${AppRoutes.aiProcessing}/$encodedText'); // Navigate to AI processing
                           },
                           style: AppTheme.accentButtonStyle,
                           child: const Padding(
@@ -251,6 +208,4 @@ Widget build(BuildContext context) {
       ),
     );
   }
-  
-
 }

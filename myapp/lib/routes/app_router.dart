@@ -37,10 +37,6 @@ class AppRouter {
         builder: (context, state) => const CameraScreen(),
       ),
       GoRoute(
-        path: AppRoutes.recipe,
-        builder: (context, state) => RecipeRecommendationScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.bpMonitor,
         builder: (context, state) => const BPMonitorScreen(),
       ),

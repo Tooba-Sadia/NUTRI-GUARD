@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../routes/app_router.dart';
 import '../theme/app_theme.dart';
 
@@ -26,30 +28,36 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
 
   Future<void> _processText() async {
     try {
-      // Simulate AI processing with a timeout
-      await Future.any([
-        Future.delayed(const Duration(seconds: 2), () {
-          // After 2 seconds, set the result and update the processing flag
-          setState(() {
-            _result = 'Based on the nutritional information:\n\n'
-                '• This product appears to be a processed food item.\n'
-                '• Contains moderate levels of sodium and sugar.\n'
-                '• Recommended to consume in moderation.\n'
-                '• Consider healthier alternatives with lower sodium content.';
-            _isProcessing = false; // Mark processing as complete
-          });
-        }),
-        Future.delayed(const Duration(seconds: 10), () {
-          // If processing takes too long, throw an error
-          throw Exception('Processing took too long. Please try again.');
-        }),
-      ]);
-    } catch (e) {
-      // Handle any errors that occur during processing
-      if (mounted) {
-        // Check if the widget is still mounted
+      // Set the Flask API URL
+      const String apiUrl = 'http://192.168.18.39:5050/check_allergens/';
+
+      // Send a POST request to the Flask API
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'ingredients': widget.text}),
+      );
+
+      if (response.statusCode == 200) {
+        // Parse the response
+        final data = jsonDecode(response.body);
+        final allergens = data['allergens_found'] as List<dynamic>;
+
+        // Update the result with the allergens found
         setState(() {
-          _error = e.toString(); // Display the error message
+          _result = allergens.isNotEmpty
+              ? 'Allergens Found:\n• ${allergens.join('\n• ')}'
+              : 'No allergens found in the text.';
+          _isProcessing = false;
+        });
+      } else {
+        throw Exception('Failed to connect to the server. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle any errors that occur during the API call
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
           _isProcessing = false;
         });
       }
@@ -69,7 +77,7 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
         elevation: 0, // No shadow under the app bar
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.go(AppRoutes.bottomNav),
+          onPressed: () => context.go(AppRoutes.home),
         ),
       ),
       body: Container(
@@ -215,7 +223,7 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton(
-                          onPressed: () => context.go(AppRoutes.bottomNav),
+                          onPressed: () => context.go(AppRoutes.home),
                           style: AppTheme.accentButtonStyle,
                           child: const Padding(
                             padding: EdgeInsets.symmetric(vertical: 15),
