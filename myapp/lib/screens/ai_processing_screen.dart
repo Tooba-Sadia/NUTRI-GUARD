@@ -29,8 +29,7 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
   Future<void> _processText() async {
     try {
       // Set the Flask API URL
-      const String apiUrl = 'http://192.168.18.39:5050/check_allergens/';
-
+      final String apiUrl = 'http://${String.fromEnvironment('API_HOST', defaultValue: 'localhost')}:5050/check_allergens/';
       // Send a POST request to the Flask API
       final response = await http.post(
         Uri.parse(apiUrl),
@@ -41,13 +40,38 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
       if (response.statusCode == 200) {
         // Parse the response
         final data = jsonDecode(response.body);
-        final allergens = data['allergens_found'] as List<dynamic>;
-
-        // Update the result with the allergens found
         setState(() {
-          _result = allergens.isNotEmpty
-              ? 'Allergens Found:\n• ${allergens.join('\n• ')}'
-              : 'No allergens found in the text.';
+          final allergens = data['allergens_found'] as List<dynamic>;
+          final highRisk = data['high_risk_ingredients'] as List<dynamic>;
+          final potentialRisks = data['potential_risks'] as List<dynamic>;
+
+          var resultText = '';
+
+          if (allergens.isEmpty) {
+            resultText = 'No confirmed allergens found.\n\n';
+          } else {
+            resultText = 'Confirmed Allergens Found:\n• ${allergens.join('\n• ')}\n\n';
+          }
+
+          if (highRisk.isNotEmpty) {
+            resultText += 'High Risk Ingredients:\n';
+            for (var item in highRisk) {
+              resultText += '• ${item['ingredient']}: ${item['allergens'].join(', ')}\n';
+              resultText += '  Found in: ${item['found_in'].join(', ')}\n';
+            }
+            resultText += '\n';
+          }
+
+          if (potentialRisks.isNotEmpty) {
+            resultText += 'Potential Risks:\n';
+            for (var item in potentialRisks) {
+              resultText += '• ${item['ingredient']} (similar to ${item['similar_to']})\n';
+              resultText += '  May contain: ${item['allergens'].join(', ')}\n';
+              resultText += '  Found in: ${item['found_in'].join(', ')}\n';
+            }
+          }
+
+          _result = resultText;
           _isProcessing = false;
         });
       } else {
