@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import '../screens/home_screen.dart';
 import '../screens/camera_screen.dart';
 import '../screens/bottom_nav.dart';
@@ -8,6 +9,7 @@ import '../screens/bp_monitor_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/ai_processing_screen.dart';
 import '../screens/image_view_page.dart';
+import '../screens/profile_screen.dart';
 
 class AppRoutes {
   static const home = '/';
@@ -18,6 +20,7 @@ class AppRoutes {
   static const settings = '/settings';
   static const aiProcessing = '/ai-processing';
   static const imageView = '/image-view';
+  static const profile = '/profile';
 }
 
 class AppRouter {
@@ -43,6 +46,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.settings,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.profile,
+        builder: (context, state) => const ProfileScreen(),
       ),
       // Routes with parameters
       GoRoute(

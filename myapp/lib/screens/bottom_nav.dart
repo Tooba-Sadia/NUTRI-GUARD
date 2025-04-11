@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myapp/screens/profile_screen.dart';
 import '../routes/app_router.dart';
 import '../theme/app_theme.dart';
+
+class AppRoutes {
+  static const home = '/home';
+  static const camera = '/camera';
+  static const recipe = '/recipe';
+  static const bpMonitor = '/bpMonitor';
+  static const settings = '/settings';
+  static const profile = '/profile';
+}
 
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});
@@ -20,6 +30,7 @@ class BottomNavScreenState extends State<BottomNavScreen> {
     AppRoutes.recipe,
     AppRoutes.bpMonitor,
     AppRoutes.settings,
+    AppRoutes.profile, // Add profile route
   ];
 
   void _onItemTapped(int index) {
@@ -45,10 +56,19 @@ class BottomNavScreenState extends State<BottomNavScreen> {
             ],
           ),
         ),
-        child: const Center(
-          child: Text(
-            'Select a tab from the bottom navigation bar',
-            style: AppTheme.bodyStyle,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Select a tab from the bottom navigation bar',
+                style: AppTheme.bodyStyle,
+              ),
+              ElevatedButton(
+                onPressed: () => context.go(AppRoutes.profile),
+                child: const Text('Go to Profile'),
+              ),
+            ],
           ),
         ),
       ),
@@ -137,6 +157,17 @@ class BottomNavScreenState extends State<BottomNavScreen> {
                 ),
                 label: 'Settings',
               ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.person_rounded,
+                  size: 24,
+                ),
+                activeIcon: Icon(
+                  Icons.person_rounded,
+                  size: 28,
+                ),
+                label: 'Profile',
+              ),
             ],
           ),
         ),
@@ -144,3 +175,6 @@ class BottomNavScreenState extends State<BottomNavScreen> {
     );
   }
 }
+
+
+
