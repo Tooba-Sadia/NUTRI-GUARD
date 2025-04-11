@@ -10,6 +10,7 @@ import '../screens/settings_screen.dart';
 import '../screens/ai_processing_screen.dart';
 import '../screens/image_view_page.dart';
 import '../screens/profile_screen.dart';
+import '../screens/splash_screen.dart';
 
 class AppRoutes {
   static const home = '/';
@@ -21,19 +22,24 @@ class AppRoutes {
   static const aiProcessing = '/ai-processing';
   static const imageView = '/image-view';
   static const profile = '/profile';
+  static const splash = '/splash';
 }
 
 class AppRouter {
   static final router = GoRouter(
-    initialLocation: AppRoutes.home, // Set the initial route to Home
+    initialLocation: '/splash', // Set the initial route to SplashScreen
     routes: [
       GoRoute(
-        path: AppRoutes.bottomNav,
-        builder: (context, state) => const BottomNavScreen(),
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
         path: AppRoutes.home,
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.bottomNav,
+        builder: (context, state) => const BottomNavScreen(),
       ),
       GoRoute(
         path: AppRoutes.camera,
