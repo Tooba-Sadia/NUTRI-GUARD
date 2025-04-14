@@ -173,4 +173,31 @@ class AppTheme {
           bodySmall: captionStyle,
         ),
       );
+
+  static bool isDarkMode = false; // Track dark mode state
+
+  static final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+
+  static ThemeData get lightTheme => ThemeData(
+        primaryColor: Colors.blue,
+        scaffoldBackgroundColor: Colors.white,
+        brightness: Brightness.light,
+        // Add other light theme properties here
+      );
+
+  static ThemeData get darkTheme => ThemeData(
+        primaryColor: Colors.black,
+        scaffoldBackgroundColor: Colors.grey[900],
+        brightness: Brightness.dark,
+        // Add other dark theme properties here
+      );
+
+  static void toggleTheme() {
+    themeNotifier.value =
+        themeNotifier.value == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+  }
+
+  static void updateTheme(BuildContext context) {
+    // Apply the theme dynamically (if using a state management solution, notify listeners here)
+  }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../routes/app_router.dart';
 import '../theme/app_theme.dart';
+import '../theme/themenotifier.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -87,6 +88,18 @@ class SettingsScreenState extends State<SettingsScreen> {
                     });
                   },
                   activeColor: AppTheme.primaryColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildSettingsCard(
+                title: 'Dark Mode',
+                description: 'Turn on/off dark mode',
+                icon: Icons.dark_mode_rounded,
+                trailing: Switch(
+                  value: AppTheme.themeNotifier.value == ThemeMode.dark,
+                  onChanged: (value) {
+                    AppTheme.toggleTheme(); // Toggle the theme
+                  },
                 ),
               ),
               const SizedBox(height: 24),
