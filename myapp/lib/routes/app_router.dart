@@ -3,14 +3,14 @@ import 'package:go_router/go_router.dart';
 
 import '../screens/home_screen.dart';
 import '../screens/camera_screen.dart';
-import '../screens/bottom_nav.dart';
+import '../screens/bottom_nav.dart' as bottom_nav;
 import '../screens/recipe_screen.dart';
 import '../screens/bp_monitor_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/ai_processing_screen.dart';
 import '../screens/image_view_page.dart';
 import '../screens/profile_screen.dart';
-import '../screens/splash_screen.dart';
+import '../screens/splash_screen.dart' as splash; 
 
 class AppRoutes {
   static const home = '/';
@@ -31,7 +31,7 @@ class AppRouter {
     routes: [
       GoRoute(
         path: '/splash',
-        builder: (context, state) => const SplashScreen(),
+        builder: (context, state) => const splash.SplashScreen(),
       ),
       GoRoute(
         path: AppRoutes.home,
@@ -39,7 +39,7 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.bottomNav,
-        builder: (context, state) => const BottomNavScreen(),
+        builder: (context, state) => const bottom_nav.BottomNavScreen(),
       ),
       GoRoute(
         path: AppRoutes.camera,
@@ -56,6 +56,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.profile,
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.recipe, // Match the route here
+        builder: (context, state) => const RecipeScreen(),
       ),
       // Routes with parameters
       GoRoute(

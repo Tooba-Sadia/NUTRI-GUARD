@@ -4,6 +4,12 @@ import 'package:go_router/go_router.dart';
 import '../routes/app_router.dart';
 import '../main.dart';
 import '../theme/app_theme.dart';
+import 'home_screen.dart';
+import 'camera_screen.dart';
+import 'recipe_screen.dart';
+import 'bp_monitor_screen.dart';
+import 'settings_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -83,6 +89,15 @@ class HomeScreenState extends State<HomeScreen> {
                   'Customize your app preferences and notifications',
                   Icons.settings_rounded,
                   AppRoutes.settings,
+                ),
+
+                const SizedBox(height: 16),
+                _buildFeatureCard(
+                  context,
+                  'Profile',
+                  'log in to your account',
+                  Icons.person_rounded,
+                  AppRoutes.profile,
                 ),
               ],
             ),
@@ -167,6 +182,82 @@ class HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class BottomNavScreen extends StatefulWidget {
+  const BottomNavScreen({super.key});
+
+  @override
+  BottomNavScreenState createState() => BottomNavScreenState();
+}
+
+class BottomNavScreenState extends State<BottomNavScreen> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const CameraScreen(),
+    const RecipeScreen(),
+    const BPMonitorScreen(),
+    const SettingsScreen(),
+    const ProfileScreen(),
+  ];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Check for a query parameter to set the selected tab
+    final queryParams = GoRouter.of(context).routerDelegate.currentConfiguration.fullPath;
+    if (queryParams.contains('tab=')) {
+      final tabIndex = int.tryParse(queryParams.split('tab=')[1]) ?? 0;
+      setState(() {
+        _selectedIndex = tabIndex;
+      });
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_rounded),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.camera_alt_rounded),
+            label: 'Scan',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.restaurant_rounded),
+            label: 'Recipes',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.health_and_safety_rounded),
+            label: 'BP Monitor',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings_rounded),
+            label: 'Settings',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_rounded),
+            label: 'Profile',
+          ),
+        ],
       ),
     );
   }

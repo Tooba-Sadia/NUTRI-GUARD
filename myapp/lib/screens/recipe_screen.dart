@@ -3,16 +3,14 @@ import 'package:go_router/go_router.dart';
 import '../routes/app_router.dart';
 import '../theme/app_theme.dart';
 
-class RecipeRecommendationScreen extends StatefulWidget {
-  const RecipeRecommendationScreen({super.key});
+class RecipeScreen extends StatefulWidget {
+  const RecipeScreen({super.key});
 
   @override
-  RecipeRecommendationScreenState createState() =>
-      RecipeRecommendationScreenState();
+  RecipeScreenState createState() => RecipeScreenState(); // Corrected State class name
 }
 
-class RecipeRecommendationScreenState
-    extends State<RecipeRecommendationScreen> {
+class RecipeScreenState extends State<RecipeScreen> { // Corrected State class name
   final List<Recipe> _recipes = [
     Recipe(
       name: 'Mediterranean Salad',

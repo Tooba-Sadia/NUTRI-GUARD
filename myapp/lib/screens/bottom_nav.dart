@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myapp/screens/profile_screen.dart';
 import '../routes/app_router.dart';
 import '../theme/app_theme.dart';
-
-class AppRoutes {
-  static const home = '/home';
-  static const camera = '/camera';
-  static const recipe = '/recipe';
-  static const bpMonitor = '/bpMonitor';
-  static const settings = '/settings';
-  static const profile = '/profile';
-}
+import 'home_screen.dart'; // Import your screens
+import 'camera_screen.dart';
+import 'recipe_screen.dart';
+import 'bp_monitor_screen.dart';
+import 'settings_screen.dart';
+import 'profile_screen.dart';
 
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});
@@ -23,55 +19,26 @@ class BottomNavScreen extends StatefulWidget {
 class BottomNavScreenState extends State<BottomNavScreen> {
   int _selectedIndex = 0;
 
-  // Define the routes for each tab
-  final List<String> _routes = [
-    AppRoutes.home,
-    AppRoutes.camera,
-    AppRoutes.recipe,
-    AppRoutes.bpMonitor,
-    AppRoutes.settings,
-    AppRoutes.profile, // Add profile route
+  // Define the screens for each tab
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const CameraScreen(),
+    const RecipeScreen(),
+    const BPMonitorScreen(),
+    const SettingsScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-
-    // Navigate to the selected route
-    context.go(_routes[index]);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.backgroundColor,
-              AppTheme.backgroundColor.withOpacity(0.8),
-            ],
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Select a tab from the bottom navigation bar',
-                style: AppTheme.bodyStyle,
-              ),
-              ElevatedButton(
-                onPressed: () => context.go(AppRoutes.profile),
-                child: const Text('Go to Profile'),
-              ),
-            ],
-          ),
-        ),
-      ),
+      body: _screens[_selectedIndex], // Dynamically display the selected screen
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -171,6 +138,58 @@ class BottomNavScreenState extends State<BottomNavScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _navigateToBottomNav();
+  }
+
+  Future<void> _navigateToBottomNav() async {
+    // Simulate a delay for the splash screen
+    await Future.delayed(const Duration(seconds: 3));
+    // Navigate to the BottomNavScreen
+    context.go(AppRoutes.bottomNav);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.primaryColor,
+      body: Center(
+        child: Image.asset(
+          'assets/app_icon.png', // Replace with your logo file path
+          width: 150,
+          height: 150,
+        ),
+      ),
+    );
+  }
+}
+
+class RecipeScreen extends StatelessWidget {
+  const RecipeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Recipes'),
+      ),
+      body: const Center(
+        child: Text('Welcome to the Recipe Screen!'),
       ),
     );
   }
