@@ -1,10 +1,54 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../routes/app_router.dart';
 import '../theme/app_theme.dart';
+import '../services/user_service.dart';
 
-class SignupScreen extends StatelessWidget {
+class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _SignupScreenState createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  Future<void> _signup() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await UserService.signup(
+        _nameController.text,
+        _emailController.text,
+        _passwordController.text,
+      );
+      print('Signup successful: $response');
+      // Navigate to the login screen or handle signup success
+    } catch (e) {
+      if (e is SocketException) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No internet connection')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Signup failed: $e')),
+        );
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,25 +74,27 @@ class SignupScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextField(
+              controller: _nameController,
               decoration: const InputDecoration(labelText: 'Name'),
             ),
             const SizedBox(height: 16),
             TextField(
+              controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
             ),
             const SizedBox(height: 16),
             TextField(
+              controller: _passwordController,
               decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () {
-                // Handle sign-up logic
-                context.go(AppRoutes.profile); // Navigate to Profile screen
-              },
+              onPressed: _isLoading ? null : _signup,
               style: AppTheme.primaryButtonStyle,
-              child: const Text('Sign Up'),
+              child: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Text('Sign Up'),
             ),
             TextButton(
               onPressed: () {
