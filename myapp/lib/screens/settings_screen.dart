@@ -96,6 +96,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                 description: 'Turn on/off dark mode',
                 icon: Icons.dark_mode_rounded,
                 trailing: Switch(
+
                   value: AppTheme.themeNotifier.value == ThemeMode.dark,
                   onChanged: (value) {
                     AppTheme.toggleTheme(); // Toggle the theme

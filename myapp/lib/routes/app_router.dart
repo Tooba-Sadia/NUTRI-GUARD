@@ -31,15 +31,27 @@ class AppRoutes {
 
 class AppRouter {
   static final router = GoRouter(
-    initialLocation: '/splash', // Set the initial route to SplashScreen
+    initialLocation: '/',
     routes: [
       GoRoute(
-        path: AppRoutes.splash,
-        builder: (context, state) => const splash.SplashScreen(),
+        path: '/',
+        builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
-        path: AppRoutes.home,
-        builder: (context, state) => const HomeScreen(),
+        path: '/profile',
+        builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/signup',
+        builder: (context, state) => const SignupScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
       GoRoute(
         path: AppRoutes.bottomNav,
@@ -54,24 +66,8 @@ class AppRouter {
         builder: (context, state) => const BPMonitorScreen(),
       ),
       GoRoute(
-        path: AppRoutes.settings,
-        builder: (context, state) => const SettingsScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.profile,
-        builder: (context, state) => const ProfileScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.recipe, // Match the route here
         builder: (context, state) => const RecipeScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.login, // Login route
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.signup, // Sign Up route
-        builder: (context, state) => const SignupScreen(),
       ),
       // Routes with parameters
       GoRoute(

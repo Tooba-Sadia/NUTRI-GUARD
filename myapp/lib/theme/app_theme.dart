@@ -182,6 +182,10 @@ class AppTheme {
         primaryColor: Colors.blue,
         scaffoldBackgroundColor: Colors.white,
         brightness: Brightness.light,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+        ),
         // Add other light theme properties here
       );
 
@@ -189,12 +193,17 @@ class AppTheme {
         primaryColor: Colors.black,
         scaffoldBackgroundColor: Colors.grey[900],
         brightness: Brightness.dark,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+        ),
         // Add other dark theme properties here
       );
 
   static void toggleTheme() {
     themeNotifier.value =
         themeNotifier.value == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    print('Theme changed to: ${themeNotifier.value}');
   }
 
   static void updateTheme(BuildContext context) {

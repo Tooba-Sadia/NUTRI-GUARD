@@ -53,6 +53,7 @@ class MyApp extends StatelessWidget {
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: AppTheme.themeNotifier,
       builder: (context, themeMode, _) {
+        print('Rebuilding app with theme: $themeMode');
         return MaterialApp.router(
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
