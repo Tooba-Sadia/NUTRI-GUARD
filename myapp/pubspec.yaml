@@ -37,6 +37,9 @@ dependencies:
   image_picker: ^0.8.4+4
   http: ^1.0.0
   shared_preferences: ^2.5.3
+  tflite_flutter: ^0.11.0
+  #tflite_flutter_helper: ^0.3.1
+  
 
 
     
@@ -71,7 +74,7 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/app_icon.png" # Path to your app icon
+  image_path: "assets/app_icon.png" # Path to app icon
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -91,6 +94,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/app_icon.png
+    - assets/model.tflite
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

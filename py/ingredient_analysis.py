@@ -11,12 +11,13 @@ class IngredientAnalyzer:
     Provides methods to map ingredients to allergens and analyze ingredient lists.
     """
 
-    def __init__(self, csv_path='allergen.csv'):
+    def __init__(self, csv_path=r'C:\Users\PMLS\Downloads\NUTRI-GUARD\py\cleaned_allergen_dataset.csv'):
         """
         Initialize the analyzer with the allergen dataset.
         Load the dataset into a pandas DataFrame and create mappings and vectors.
         """
         self.df = pd.read_csv(csv_path)  # Load allergen dataset
+        print("Columns in the dataset:", self.df.columns)
         # Create mapping between ingredients and their allergens
         self.ingredient_allergen_map = self._create_ingredient_allergen_map()
         # Initialize TF-IDF vectorizer with unigrams and bigrams
@@ -26,9 +27,9 @@ class IngredientAnalyzer:
         self._create_ingredient_vectors()
 
     def _create_ingredient_vectors(self):
-        """
-        Create TF-IDF vectors for ingredient matching.
-        """
+        
+        #Create TF-IDF vectors for ingredient matching.
+        
         # Get list of all known ingredients
         ingredients = list(self.ingredient_allergen_map.keys())
         # Convert ingredients to TF-IDF vectors for similarity matching
@@ -66,35 +67,26 @@ class IngredientAnalyzer:
         """
         # Create dictionary with nested structure for allergens and context
         mapping = defaultdict(lambda: {'allergens': set(), 'context': []})
-        
+
         for _, row in self.df.iterrows():
-            # Extract all ingredient columns from dataset
-            ingredients = [
-                str(row['Main Ingredient']),
-                str(row['Sweetener']),
-                str(row['Fat/Oil']),
-                str(row['Seasoning'])
-            ]
-            
-            # Process allergens, handling missing values
-            allergens = str(row['Allergens']).split(',') if pd.notna(row['Allergens']) else []
-            allergens = [a.strip().lower() for a in allergens]  # Clean allergen names
-            
-            # Get food product name for context
-            food_product = str(row['Food Product']).lower()
-            
+            # Get the combined ingredients and label
+            combined_ingredients = str(row['Combined_Ingredients']).lower().split(', ')
+            label = row['Label']  # 1 indicates allergen present, 0 indicates no allergen
+
             # Map each ingredient to its allergens and context
-            for ingredient in ingredients:
-                if ingredient.lower() != 'none':  # Skip empty ingredients
-                    ing_key = ingredient.lower()
-                    mapping[ing_key]['allergens'].update(allergens)  # Add allergens
-                    mapping[ing_key]['context'].append(food_product)  # Add context
-        
+            for ingredient in combined_ingredients:
+                if ingredient and ingredient != 'none':  # Skip empty or invalid ingredients
+                    mapping[ingredient]['allergens'].add('allergen' if label == 1 else 'no allergen')
+                    mapping[ingredient]['context'].append(combined_ingredients)
+
         return mapping
 
-    def analyze_ingredients(self, ingredients_text):
+    def analyze_ingredients(self, ingredients_text, tflite_classifier):
         """
-        Enhanced ingredient analysis with context and similarity matching.
+        Enhanced ingredient analysis with context, similarity matching, and TFLite model inference.
+        Args:
+            ingredients_text (str): Comma-separated list of ingredients to analyze.
+            tflite_classifier (AllergenClassifier): Instance of the TFLite classifier.
         Returns:
             dict: Dictionary containing:
                 - 'allergens_found': List of unique allergens found
@@ -102,15 +94,20 @@ class IngredientAnalyzer:
                   and their associated allergens
                 - 'potential_risks': List of dictionaries containing potential risks based on
                   similar ingredients and their associated allergens
+                - 'model_prediction': TFLite model's prediction for the input text
         """
+        print("Ingredients text:", ingredients_text)
         # Split and clean input ingredients
         ingredients = [i.strip().lower() for i in ingredients_text.split(',')]
         found_allergens = set()  # Track unique allergens
         high_risk_ingredients = []  # Track direct matches
         potential_risks = []  # Track similar ingredient matches
 
+        # Use the TFLite model to predict allergen status for the entire input
+        model_prediction = tflite_classifier.predict(ingredients_text)
+
         for ingredient in ingredients:
-            # Check for exact matches in database
+            # Check for exact matches in the database
             if ingredient in self.ingredient_allergen_map:
                 allergens = self.ingredient_allergen_map[ingredient]['allergens']
                 if allergens:  # If allergens found
@@ -121,7 +118,7 @@ class IngredientAnalyzer:
                         'confidence': 'high',  # Direct match = high confidence
                         'found_in': self.ingredient_allergen_map[ingredient]['context'][:3]
                     })
-            
+
             # Check for similar ingredients that might indicate allergens
             similar_ingredients = self._find_similar_ingredients(ingredient)
             for similar_ing in similar_ingredients:
@@ -136,9 +133,14 @@ class IngredientAnalyzer:
                             'found_in': self.ingredient_allergen_map[similar_ing]['context'][:3]
                         })
 
+        # Combine results from fuzzy matching and TFLite model
+        final_decision = "Allergen" if model_prediction == "Allergen" or found_allergens else "Non-Allergen"
+
         # Return comprehensive analysis results
         return {
             'allergens_found': list(found_allergens),
             'high_risk_ingredients': high_risk_ingredients,
-            'potential_risks': potential_risks
+            'potential_risks': potential_risks,
+            'model_prediction': model_prediction,
+            'final_decision': final_decision
         }
