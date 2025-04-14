@@ -1,34 +1,14 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
-
 import '../routes/app_router.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatelessWidget {
+  final bool isLoggedIn = false; // Replace with actual login state logic
+  final String userName = 'John Doe'; // Replace with actual user data
+
   const ProfileScreen({super.key});
-
-  @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  Future<void> _saveUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('name', _nameController.text);
-    await prefs.setString('email', _emailController.text);
-    await prefs.setString('password', _passwordController.text);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('User data saved successfully!')),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,54 +16,95 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         title: const Text('Profile'),
         backgroundColor: AppTheme.primaryColor,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back), // Back icon
+          onPressed: () {
+            // Navigate back to Home if there's no previous screen
+            if (GoRouter.of(context).canPop()) {
+              context.pop(); // Pop the current screen if possible
+            } else {
+              context.go(AppRoutes.home); // Navigate to Home if nothing to pop
+            }
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Center(
-              child: ElevatedButton(
-                onPressed: _saveUserData,
-                style: AppTheme.primaryButtonStyle,
-                child: const Text('Save'),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: ElevatedButton(
-                onPressed: () => context.go(AppRoutes.profile),
-                child: const Text('Go to Profile'),
-              ),
-            ),
-          ],
-        ),
+        child: isLoggedIn
+            ? _buildLoggedInView(context) // Show profile info if logged in
+            : _buildLoggedOutView(context), // Show login/signup options if not logged in
       ),
+    );
+  }
+
+  // View for logged-in users
+  Widget _buildLoggedInView(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        CircleAvatar(
+          radius: 50,
+          backgroundColor: AppTheme.primaryLightColor,
+          child: const Icon(
+            Icons.person_rounded,
+            size: 50,
+            color: AppTheme.primaryColor,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          userName,
+          style: AppTheme.headingStyle,
+        ),
+        const SizedBox(height: 32),
+        ElevatedButton(
+          onPressed: () {
+            // Handle logout logic
+            context.go(AppRoutes.login); // Navigate to Login screen
+          },
+          style: AppTheme.primaryButtonStyle,
+          child: const Text('Logout'),
+        ),
+      ],
+    );
+  }
+
+  // View for logged-out users
+  Widget _buildLoggedOutView(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'Welcome to NutriGuard!',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          'Log in or sign up to access your profile and personalized features.',
+          style: TextStyle(fontSize: 16),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 32),
+        ElevatedButton(
+          onPressed: () {
+            context.go(AppRoutes.login); // Navigate to Login screen
+          },
+          style: AppTheme.primaryButtonStyle,
+          child: const Text('Login'),
+        ),
+        const SizedBox(height: 16),
+        OutlinedButton(
+          onPressed: () {
+            context.go(AppRoutes.signup); // Navigate to Sign Up screen
+          },
+          style: AppTheme.secondaryButtonStyle,
+          child: const Text('Sign Up'),
+        ),
+      ],
     );
   }
 }

@@ -11,18 +11,22 @@ import '../screens/ai_processing_screen.dart';
 import '../screens/image_view_page.dart';
 import '../screens/profile_screen.dart';
 import '../screens/splash_screen.dart' as splash; 
+import '../screens/login_screen.dart';
+import '../screens/signup_screen.dart';
 
 class AppRoutes {
-  static const home = '/';
-  static const camera = '/camera';
-  static const bottomNav = '/bottom-nav';
-  static const recipe = '/recipe';
-  static const bpMonitor = '/bp-monitor';
-  static const settings = '/settings';
-  static const aiProcessing = '/ai-processing';
-  static const imageView = '/image-view';
-  static const profile = '/profile';
-  static const splash = '/splash';
+  static const  home = '/';
+  static const  camera = '/camera';
+  static const  bottomNav = '/bottom-nav';
+  static const  recipe = '/recipe';
+  static const  bpMonitor = '/bp-monitor';
+  static const  settings = '/settings';
+  static const  aiProcessing = '/ai-processing';
+  static const  imageView = '/image-view';
+  static const  profile = '/profile';
+  static const  splash = '/splash';
+  static const  login = '/login'; // Add login route
+  static const  signup = '/signup'; // Add signup route
 }
 
 class AppRouter {
@@ -30,7 +34,7 @@ class AppRouter {
     initialLocation: '/splash', // Set the initial route to SplashScreen
     routes: [
       GoRoute(
-        path: '/splash',
+        path: AppRoutes.splash,
         builder: (context, state) => const splash.SplashScreen(),
       ),
       GoRoute(
@@ -60,6 +64,14 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.recipe, // Match the route here
         builder: (context, state) => const RecipeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.login, // Login route
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.signup, // Sign Up route
+        builder: (context, state) => const SignupScreen(),
       ),
       // Routes with parameters
       GoRoute(
