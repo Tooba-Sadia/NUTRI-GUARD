@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:provider/provider.dart'; // Ensure this import is present for Provider
 import 'routes/app_router.dart';
 import 'dart:async';
 import 'theme/app_theme.dart';
+import 'theme/themenotifier.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -48,11 +50,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      routerConfig: AppRouter.router,
-      theme: AppTheme.theme,
-      title: 'NutriGuard',
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: AppTheme.themeNotifier,
+      builder: (context, themeMode, _) {
+        print('Rebuilding app with theme: $themeMode');
+        return MaterialApp.router(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          routerConfig: AppRouter.router,
+          title: 'NutriGuard',
+        );
+      },
     );
   }
 }

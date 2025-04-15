@@ -3,43 +3,59 @@ import 'package:go_router/go_router.dart';
 
 import '../screens/home_screen.dart';
 import '../screens/camera_screen.dart';
-import '../screens/bottom_nav.dart';
+import '../screens/bottom_nav.dart' as bottom_nav;
 import '../screens/recipe_screen.dart';
 import '../screens/bp_monitor_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/ai_processing_screen.dart';
 import '../screens/image_view_page.dart';
 import '../screens/profile_screen.dart';
-import '../screens/splash_screen.dart';
+import '../screens/splash_screen.dart' as splash; 
+import '../screens/login_screen.dart';
+import '../screens/signup_screen.dart';
 
 class AppRoutes {
-  static const home = '/';
-  static const camera = '/camera';
-  static const bottomNav = '/bottom-nav';
-  static const recipe = '/recipe';
-  static const bpMonitor = '/bp-monitor';
-  static const settings = '/settings';
-  static const aiProcessing = '/ai-processing';
-  static const imageView = '/image-view';
-  static const profile = '/profile';
-  static const splash = '/splash';
+  static const  home = '/';
+  static const  camera = '/camera';
+  static const  bottomNav = '/bottom-nav';
+  static const  recipe = '/recipe';
+  static const  bpMonitor = '/bp-monitor';
+  static const  settings = '/settings';
+  static const  aiProcessing = '/ai-processing';
+  static const  imageView = '/image-view';
+  static const  profile = '/profile';
+  static const  splash = '/splash';
+  static const  login = '/login'; // Add login route
+  static const  signup = '/signup'; // Add signup route
 }
 
 class AppRouter {
   static final router = GoRouter(
-    initialLocation: '/splash', // Set the initial route to SplashScreen
+    initialLocation: '/',
     routes: [
       GoRoute(
-        path: '/splash',
-        builder: (context, state) => const SplashScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.home,
+        path: '/',
         builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/signup',
+        builder: (context, state) => const SignupScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.bottomNav,
-        builder: (context, state) => const BottomNavScreen(),
+        builder: (context, state) => const bottom_nav.BottomNavScreen(),
       ),
       GoRoute(
         path: AppRoutes.camera,
@@ -50,12 +66,8 @@ class AppRouter {
         builder: (context, state) => const BPMonitorScreen(),
       ),
       GoRoute(
-        path: AppRoutes.settings,
-        builder: (context, state) => const SettingsScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.profile,
-        builder: (context, state) => const ProfileScreen(),
+        path: AppRoutes.recipe, // Match the route here
+        builder: (context, state) => const RecipeScreen(),
       ),
       // Routes with parameters
       GoRoute(
