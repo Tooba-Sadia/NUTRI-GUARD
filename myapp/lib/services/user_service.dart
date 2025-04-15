@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../services/user_service.dart';
 
 class UserService {
-  static const String baseUrl = 'http://10.0.2.2:5000'; // Flask API URL
+  static const String baseUrl = 'http://10.8.144.101:5000'; // Flask API URL
 
   // Login API
   static Future<Map<String, dynamic>> login(String email, String password) async {
@@ -44,6 +44,7 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _LoginScreenState createState() => _LoginScreenState();
 }
 
