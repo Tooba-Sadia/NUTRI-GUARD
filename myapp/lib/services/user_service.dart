@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import '../services/user_service.dart';
 
 class UserService {
-  static const String baseUrl = 'http://10.8.144.101:5000'; // Flask API URL
+  //static const String baseUrl = 'http://10.8.144.101:5000'; // Flask API URL
+  static const String baseUrl = 'http://192.168.18.19:5000';  // your PC IP here
+
 
   // Login API
   static Future<Map<String, dynamic>> login(String email, String password) async {
@@ -29,7 +31,11 @@ class UserService {
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'name': name, 'email': email, 'password': password}),
+      body: jsonEncode({
+        'username': name, // <-- use 'username' instead of 'name'
+        'email': email,
+        'password': password,
+      }),
     );
 
     if (response.statusCode == 201) {
