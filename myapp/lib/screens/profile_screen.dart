@@ -5,10 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../routes/app_router.dart';
 
 class ProfileScreen extends StatelessWidget {
-  final bool isLoggedIn = false; // Replace with actual login state logic
-  final String userName = 'John Doe'; // Replace with actual user data
-
-  const ProfileScreen({super.key});
+  final String? username;
+  final bool isLoggedIn;
+  const ProfileScreen({super.key, required this.username, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +52,8 @@ class ProfileScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          userName,
-          style: AppTheme.headingStyle,
+          username ?? 'Guest',
+          style: TextStyle(fontSize: 24),
         ),
         const SizedBox(height: 32),
         ElevatedButton(
@@ -108,8 +107,12 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
-
 final profileRoute = GoRoute(
   path: AppRoutes.profile,
-  builder: (context, state) => const ProfileScreen(),
+  builder: (context, state) {
+    final extra = state.extra as Map<String, dynamic>?;
+    final isLoggedIn = extra?['isLoggedIn'] as bool? ?? false;
+    return ProfileScreen(username: null, isLoggedIn: isLoggedIn);
+  },
 );
+

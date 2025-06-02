@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import '../services/user_service.dart';
+import '../screens/profile_screen.dart'; // Import ProfileScreen here
 
 class UserService {
   //static const String baseUrl = 'http://10.8.144.101:5000'; // Flask API URL
@@ -76,11 +77,26 @@ class _LoginScreenState extends State<LoginScreen> {
         _emailController.text,
         _passwordController.text,
       );
-      print('Login successful: $response');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login successful!')),
-      );
-      // Navigate to the home screen or handle login success
+      print('Login response: $response');
+      if (response['status'] == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login successful!')),
+        );
+        // Navigate to profile screen and pass username
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProfileScreen(
+              username: response['user']['username'],
+              isLoggedIn: true,
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'] ?? 'Login failed')),
+        );
+      }
     } catch (e) {
       print('Login failed: $e');
       ScaffoldMessenger.of(context).showSnackBar(

@@ -203,7 +203,7 @@ class BottomNavScreenState extends State<BottomNavScreen> {
     const RecipeScreen(),
     const BPMonitorScreen(),
     const SettingsScreen(),
-    const ProfileScreen(),
+    ProfileScreen(username: 'Guest', isLoggedIn: false,),
   ];
 
   @override

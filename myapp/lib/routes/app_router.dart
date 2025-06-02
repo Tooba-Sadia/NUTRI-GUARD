@@ -39,7 +39,11 @@ class AppRouter {
       ),
       GoRoute(
         path: '/profile',
-        builder: (context, state) => const ProfileScreen(),
+        builder: (context, state) {
+          // Replace with actual username retrieval logic as needed
+          final username = state.extra as String? ?? '';
+          return ProfileScreen(username: username, isLoggedIn: true);
+        },
       ),
       GoRoute(
         path: '/login',

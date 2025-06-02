@@ -26,7 +26,7 @@ class BottomNavScreenState extends State<BottomNavScreen> {
     const RecipeScreen(),
     const BPMonitorScreen(),
     const SettingsScreen(),
-    const ProfileScreen(),
+    ProfileScreen(username: 'YourUsername', isLoggedIn: true), // Replace with actual username and login status
   ];
 
   void _onItemTapped(int index) {
