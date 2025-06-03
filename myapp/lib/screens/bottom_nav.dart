@@ -20,7 +20,7 @@ class BottomNavScreenState extends State<BottomNavScreen> {
   int _selectedIndex = 0;
 
   String? _username;
-bool _isLoggedIn = false;
+  bool _isLoggedIn = false;
 
   @override
   void didChangeDependencies() {
@@ -43,14 +43,14 @@ bool _isLoggedIn = false;
   }
 
   // Define the screens for each tab
-  List<Widget> get _screens => [
-        HomeScreen(username: _username, isLoggedIn: _isLoggedIn),
-        const CameraScreen(),
-        const RecipeScreen(),
-        const BPMonitorScreen(),
-        const SettingsScreen(),
-        ProfileScreen(username: _username, isLoggedIn: _isLoggedIn),
-      ];
+  final List<Widget> _screens = [
+    const HomeScreen(username: null, isLoggedIn: false),
+    const CameraScreen(),
+    const RecipeScreen(),
+    const BPMonitorScreen(),
+    const SettingsScreen(),
+    ProfileScreen(username: 'Guest', isLoggedIn: false),
+  ];
 
   void _onItemTapped(int index) {
     setState(() {

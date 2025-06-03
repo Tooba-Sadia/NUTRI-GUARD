@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../routes/app_router.dart';
 import '../main.dart';
 import '../theme/app_theme.dart';
+import '../state/user_state.dart';
 // import 'home_screen.dart';
 import 'camera_screen.dart';
 import 'recipe_screen.dart';
@@ -19,37 +21,27 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userState = Provider.of<UserState>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
-        actions: isLoggedIn && username != null
-            ? [
-                GestureDetector(
-                  onTap: () {
-                    context.go(
-                      AppRoutes.settings,
-                      extra: {
-                        'username': username,
-                        'isLoggedIn': isLoggedIn,
-                      },
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16.0),
-                    child: Center(
-                      child: Text(
-                        username!,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Center(
+              child: Text(
+                userState.isLoggedIn && userState.username != null
+                    ? userState.username!
+                    : 'Not logged in',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-              ]
-            : [],
+              ),
+            ),
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(

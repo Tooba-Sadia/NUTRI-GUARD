@@ -47,8 +47,7 @@ class AppRouter {
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>? ?? {};
           final username = extra['username'] as String?;
-          final isLoggedIn = extra['isLoggedIn'] as bool? ?? false;
-          return ProfileScreen(username: username, isLoggedIn: isLoggedIn);
+          return ProfileScreen(username: username, isLoggedIn: false,);
         },
       ),
       GoRoute(

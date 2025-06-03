@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../routes/app_router.dart';
 import '../theme/app_theme.dart';
 import '../services/user_service.dart';
+import '../state/user_state.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -37,13 +39,8 @@ class _SignupScreenState extends State<SignupScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Signup successful!')),
         );
-        context.go(
-          AppRoutes.profile,
-          extra: {
-            'username': response['user']['username'],
-            'isLoggedIn': true,
-          },
-        );
+        Provider.of<UserState>(context, listen: false).login(response['user']['username']);
+        context.go(AppRoutes.home);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(response['message'] ?? 'Signup failed')),

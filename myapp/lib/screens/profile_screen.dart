@@ -1,53 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../state/user_state.dart';
+import '../theme/app_theme.dart';
 import '../routes/app_router.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String? username;
   final bool isLoggedIn;
-  const ProfileScreen({super.key, required this.username, required this.isLoggedIn});
+
+  const ProfileScreen({super.key, this.username, this.isLoggedIn = false});
 
   @override
   Widget build(BuildContext context) {
+    final userState = Provider.of<UserState>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
         backgroundColor: AppTheme.primaryColor,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Center(
+              child: Text(
+                userState.isLoggedIn && userState.username != null
+                    ? userState.username!
+                    : 'Not logged in',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back), // Back icon
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            // Navigate back to Home if there's no previous screen
-            if (GoRouter.of(context).canPop()) {
-              context.pop(); // Pop the current screen if possible
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
             } else {
-              context.go(AppRoutes.home); // Navigate to Home if nothing to pop
+              Navigator.of(context).pushReplacementNamed(AppRoutes.home);
             }
           },
         ),
-        actions: isLoggedIn && username != null
-            ? [
-                Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: Center(
-                    child: Text(
-                      username!,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ]
-            : [],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: isLoggedIn
-            ? _buildLoggedInView(context, username) // Pass username here
+        child: userState.isLoggedIn
+            ? _buildLoggedInView(context, userState.username)
             : _buildLoggedOutView(context),
       ),
     );
@@ -123,13 +125,4 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
-final profileRoute = GoRoute(
-  path: AppRoutes.profile,
-  builder: (context, state) {
-    final extra = state.extra as Map<String, dynamic>? ?? {};
-    final isLoggedIn = extra['isLoggedIn'] as bool? ?? false;
-    final username = extra['username'] as String?;
-    return ProfileScreen(username: username, isLoggedIn: isLoggedIn);
-  },
-);
 

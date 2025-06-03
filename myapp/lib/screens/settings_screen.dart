@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../routes/app_router.dart';
+import '../state/user_state.dart';
 import '../theme/app_theme.dart';
 import '../theme/themenotifier.dart';
 
@@ -17,6 +19,7 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userState = Provider.of<UserState>(context);
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
@@ -26,9 +29,26 @@ class SettingsScreenState extends State<SettingsScreen> {
         ),
         backgroundColor: AppTheme.primaryColor,
         elevation: 0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Center(
+              child: Text(
+                userState.isLoggedIn && userState.username != null
+                    ? userState.username!
+                    : 'Not logged in',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.go(AppRoutes.home), // Redirect to Home
+          onPressed: () => Navigator.of(context).pushReplacementNamed(AppRoutes.home),
         ),
       ),
       body: Container(

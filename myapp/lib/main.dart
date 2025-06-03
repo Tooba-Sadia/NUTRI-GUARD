@@ -5,6 +5,7 @@ import 'routes/app_router.dart';
 import 'dart:async';
 import 'theme/app_theme.dart';
 import 'theme/themenotifier.dart';
+import 'state/user_state.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -42,7 +43,15 @@ Future<void> main() async {
   }
   
   // Run the app after all initialization attempts
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserState()),
+        // ...other providers...
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
