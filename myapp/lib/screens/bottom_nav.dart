@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../routes/app_router.dart';
 import '../theme/app_theme.dart';
 import 'home_screen.dart'; // Import your screens
@@ -8,6 +9,7 @@ import 'recipe_screen.dart';
 import 'bp_monitor_screen.dart';
 import 'settings_screen.dart';
 import 'profile_screen.dart';
+import '../state/user_state.dart';
 
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});
@@ -19,7 +21,9 @@ class BottomNavScreen extends StatefulWidget {
 class BottomNavScreenState extends State<BottomNavScreen> {
   int _selectedIndex = 0;
 
+  // ignore: unused_field
   String? _username;
+  // ignore: unused_field
   bool _isLoggedIn = false;
 
   @override
@@ -43,14 +47,17 @@ class BottomNavScreenState extends State<BottomNavScreen> {
   }
 
   // Define the screens for each tab
-  final List<Widget> _screens = [
-    const HomeScreen(username: null, isLoggedIn: false),
-    const CameraScreen(),
-    const RecipeScreen(),
-    const BPMonitorScreen(),
-    const SettingsScreen(),
-    ProfileScreen(username: 'Guest', isLoggedIn: false),
-  ];
+  List<Widget> get _screens {
+    final userState = Provider.of<UserState>(context);
+    return [
+      HomeScreen(username: userState.username, isLoggedIn: userState.isLoggedIn),
+      const CameraScreen(),
+      const RecipeScreen(),
+      const BPMonitorScreen(),
+      const SettingsScreen(),
+      ProfileScreen(username: userState.username, isLoggedIn: userState.isLoggedIn),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {

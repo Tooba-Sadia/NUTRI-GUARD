@@ -77,6 +77,8 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 32),
         ElevatedButton(
           onPressed: () {
+                Provider.of<UserState>(context, listen: false).logout();
+
             context.go(AppRoutes.login); // Navigate to Login screen
           },
           style: AppTheme.primaryButtonStyle,
