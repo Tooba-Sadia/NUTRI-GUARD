@@ -32,7 +32,23 @@ class _SignupScreenState extends State<SignupScreen> {
         _passwordController.text,
       );
       print('Signup successful: $response');
-      // Navigate to the login screen or handle signup success
+      // After receiving a successful signup response
+      if (response['status'] == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Signup successful!')),
+        );
+        context.go(
+          AppRoutes.profile,
+          extra: {
+            'username': response['user']['username'],
+            'isLoggedIn': true,
+          },
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'] ?? 'Signup failed')),
+        );
+      }
     } catch (e) {
       if (e is SocketException) {
         ScaffoldMessenger.of(context).showSnackBar(

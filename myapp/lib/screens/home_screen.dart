@@ -4,27 +4,53 @@ import 'package:go_router/go_router.dart';
 import '../routes/app_router.dart';
 import '../main.dart';
 import '../theme/app_theme.dart';
-import 'home_screen.dart';
+// import 'home_screen.dart';
 import 'camera_screen.dart';
 import 'recipe_screen.dart';
 import 'bp_monitor_screen.dart';
 import 'settings_screen.dart';
 import 'profile_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatelessWidget {
+  final String? username;
+  final bool isLoggedIn;
 
-  @override
-  HomeScreenState createState() =>
-      HomeScreenState(); // Create state for HomeScreen
-}
+  const HomeScreen({super.key, required this.username, required this.isLoggedIn});
 
-// State class for HomeScreen
-class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      appBar: AppBar(
+        title: const Text('Home'),
+        actions: isLoggedIn && username != null
+            ? [
+                GestureDetector(
+                  onTap: () {
+                    context.go(
+                      AppRoutes.settings,
+                      extra: {
+                        'username': username,
+                        'isLoggedIn': isLoggedIn,
+                      },
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 16.0),
+                    child: Center(
+                      child: Text(
+                        username!,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ]
+            : [],
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -198,7 +224,7 @@ class BottomNavScreenState extends State<BottomNavScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
+    const HomeScreen(username: null, isLoggedIn: false),
     const CameraScreen(),
     const RecipeScreen(),
     const BPMonitorScreen(),

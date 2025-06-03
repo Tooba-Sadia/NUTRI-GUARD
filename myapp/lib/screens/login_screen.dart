@@ -35,7 +35,22 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text,
       );
       print('Login successful: $response');
-      context.go(AppRoutes.profile); // Navigate to Profile screen
+      if (response['status'] == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login successful!')),
+        );
+        context.go(
+          AppRoutes.profile,
+          extra: {
+            'username': response['user']['username'],
+            'isLoggedIn': true,
+          },
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'] ?? 'Login failed')),
+        );
+      }
     } catch (e) {
       print('Login failed: $e');
       ScaffoldMessenger.of(context).showSnackBar(

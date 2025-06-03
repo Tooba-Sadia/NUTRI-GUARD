@@ -26,18 +26,35 @@ class ProfileScreen extends StatelessWidget {
             }
           },
         ),
+        actions: isLoggedIn && username != null
+            ? [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Center(
+                    child: Text(
+                      username!,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ]
+            : [],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: isLoggedIn
-            ? _buildLoggedInView(context) // Show profile info if logged in
-            : _buildLoggedOutView(context), // Show login/signup options if not logged in
+            ? _buildLoggedInView(context, username) // Pass username here
+            : _buildLoggedOutView(context),
       ),
     );
   }
 
   // View for logged-in users
-  Widget _buildLoggedInView(BuildContext context) {
+  Widget _buildLoggedInView(BuildContext context, String? username) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -53,12 +70,11 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           username ?? 'Guest',
-          style: TextStyle(fontSize: 24),
+          style: const TextStyle(fontSize: 24),
         ),
         const SizedBox(height: 32),
         ElevatedButton(
           onPressed: () {
-            // Handle logout logic
             context.go(AppRoutes.login); // Navigate to Login screen
           },
           style: AppTheme.primaryButtonStyle,
@@ -110,9 +126,10 @@ class ProfileScreen extends StatelessWidget {
 final profileRoute = GoRoute(
   path: AppRoutes.profile,
   builder: (context, state) {
-    final extra = state.extra as Map<String, dynamic>?;
-    final isLoggedIn = extra?['isLoggedIn'] as bool? ?? false;
-    return ProfileScreen(username: null, isLoggedIn: isLoggedIn);
+    final extra = state.extra as Map<String, dynamic>? ?? {};
+    final isLoggedIn = extra['isLoggedIn'] as bool? ?? false;
+    final username = extra['username'] as String?;
+    return ProfileScreen(username: username, isLoggedIn: isLoggedIn);
   },
 );
 

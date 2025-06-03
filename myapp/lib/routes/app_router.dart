@@ -34,15 +34,21 @@ class AppRouter {
     initialLocation: '/',
     routes: [
       GoRoute(
-        path: '/',
-        builder: (context, state) => const HomeScreen(),
+        path: AppRoutes.home,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          final username = extra['username'] as String?;
+          final isLoggedIn = extra['isLoggedIn'] as bool? ?? false;
+          return HomeScreen(username: username, isLoggedIn: isLoggedIn);
+        },
       ),
       GoRoute(
         path: '/profile',
         builder: (context, state) {
-          // Replace with actual username retrieval logic as needed
-          final username = state.extra as String? ?? '';
-          return ProfileScreen(username: username, isLoggedIn: true);
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          final username = extra['username'] as String?;
+          final isLoggedIn = extra['isLoggedIn'] as bool? ?? false;
+          return ProfileScreen(username: username, isLoggedIn: isLoggedIn);
         },
       ),
       GoRoute(
@@ -55,7 +61,11 @@ class AppRouter {
       ),
       GoRoute(
         path: '/settings',
-        builder: (context, state) => const SettingsScreen(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          final username = extra['username'] as String?;
+          return SettingsScreen(username: username);
+        },
       ),
       GoRoute(
         path: AppRoutes.bottomNav,

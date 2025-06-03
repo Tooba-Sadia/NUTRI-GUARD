@@ -7,7 +7,7 @@ import '../screens/profile_screen.dart'; // Import ProfileScreen here
 
 class UserService {
   //static const String baseUrl = 'http://10.8.144.101:5000'; // Flask API URL
-  static const String baseUrl = 'http://192.168.18.19:5000';  // your PC IP here
+  static const String baseUrl = 'http://192.168.18.15:5000';  // your PC IP here
 
 
   // Login API

@@ -5,7 +5,7 @@ import '../theme/app_theme.dart';
 import '../theme/themenotifier.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, String? username});
 
   @override
   SettingsScreenState createState() => SettingsScreenState();

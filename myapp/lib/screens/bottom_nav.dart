@@ -19,15 +19,38 @@ class BottomNavScreen extends StatefulWidget {
 class BottomNavScreenState extends State<BottomNavScreen> {
   int _selectedIndex = 0;
 
+  String? _username;
+bool _isLoggedIn = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final extra = GoRouter.of(context).routerDelegate.currentConfiguration.extra;
+    if (extra is Map<String, dynamic>) {
+      setState(() {
+        _username = extra['username'] as String?;
+        _isLoggedIn = extra['isLoggedIn'] as bool? ?? false;
+      });
+    }
+    // Your existing tab selection logic can stay here
+    final queryParams = GoRouter.of(context).routerDelegate.currentConfiguration.fullPath;
+    if (queryParams.contains('tab=')) {
+      final tabIndex = int.tryParse(queryParams.split('tab=')[1]) ?? 0;
+      setState(() {
+        _selectedIndex = tabIndex;
+      });
+    }
+  }
+
   // Define the screens for each tab
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const CameraScreen(),
-    const RecipeScreen(),
-    const BPMonitorScreen(),
-    const SettingsScreen(),
-    ProfileScreen(username: 'YourUsername', isLoggedIn: true), // Replace with actual username and login status
-  ];
+  List<Widget> get _screens => [
+        HomeScreen(username: _username, isLoggedIn: _isLoggedIn),
+        const CameraScreen(),
+        const RecipeScreen(),
+        const BPMonitorScreen(),
+        const SettingsScreen(),
+        ProfileScreen(username: _username, isLoggedIn: _isLoggedIn),
+      ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -38,7 +61,7 @@ class BottomNavScreenState extends State<BottomNavScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex], // Dynamically display the selected screen
+      body: _screens[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -161,7 +184,13 @@ class _SplashScreenState extends State<SplashScreen> {
     // Simulate a delay for the splash screen
     await Future.delayed(const Duration(seconds: 3));
     // Navigate to the BottomNavScreen
-    context.go(AppRoutes.bottomNav);
+    context.go(
+      AppRoutes.bottomNav,
+      extra: {
+        'username': null,
+        'isLoggedIn': false,
+      },
+    );
   }
 
   @override
@@ -194,6 +223,8 @@ class RecipeScreen extends StatelessWidget {
     );
   }
 }
+
+
 
 
 
