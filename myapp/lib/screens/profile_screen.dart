@@ -8,8 +8,9 @@ import '../routes/app_router.dart';
 class ProfileScreen extends StatelessWidget {
   final String? username;
   final bool isLoggedIn;
+  final int? userId;
 
-  const ProfileScreen({super.key, this.username, this.isLoggedIn = false});
+  const ProfileScreen({super.key, this.username, this.isLoggedIn = false, this.userId});
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
 import '../routes/app_router.dart';
 import '../theme/app_theme.dart';
 import '../services/user_service.dart';
@@ -41,8 +42,17 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login successful!')),
         );
-        Provider.of<UserState>(context, listen: false)
-            .login(response['user']['username']);
+        final user = response['user'];
+        final userId = int.parse(user['id'].toString());
+        Provider.of<UserState>(context, listen: false).login(
+          response['user']['username'],
+          int.parse(response['user']['id'].toString()),
+          response['user']['allergens'] == null
+              ? []
+              : (response['user']['allergens'] is List
+                  ? List<String>.from(response['user']['allergens'])
+                  : List<String>.from(jsonDecode(response['user']['allergens']))),
+        );
         context.go(AppRoutes.home);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

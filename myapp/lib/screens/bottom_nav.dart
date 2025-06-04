@@ -21,21 +21,18 @@ class BottomNavScreen extends StatefulWidget {
 class BottomNavScreenState extends State<BottomNavScreen> {
   int _selectedIndex = 0;
 
-  // ignore: unused_field
-  String? _username;
-  // ignore: unused_field
-  bool _isLoggedIn = false;
+
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final extra = GoRouter.of(context).routerDelegate.currentConfiguration.extra;
-    if (extra is Map<String, dynamic>) {
-      setState(() {
-        _username = extra['username'] as String?;
-        _isLoggedIn = extra['isLoggedIn'] as bool? ?? false;
-      });
-    }
+    //final extra = GoRouter.of(context).routerDelegate.currentConfiguration.extra;
+    //if (extra is Map<String, dynamic>) {
+      //setState(() {
+        //_username = extra['username'] as String?;
+        //_isLoggedIn = extra['isLoggedIn'] as bool? ?? false;
+      //});
+    // }
     // Your existing tab selection logic can stay here
     final queryParams = GoRouter.of(context).routerDelegate.currentConfiguration.fullPath;
     if (queryParams.contains('tab=')) {

@@ -39,7 +39,11 @@ class _SignupScreenState extends State<SignupScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Signup successful!')),
         );
-        Provider.of<UserState>(context, listen: false).login(response['user']['username']);
+        Provider.of<UserState>(context, listen: false).login(
+          response['user']['username'],
+          response['user']['email'],
+          response['user']['id'],
+        );
         context.go(AppRoutes.home);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

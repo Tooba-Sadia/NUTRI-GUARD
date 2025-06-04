@@ -2,12 +2,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Import provider package
 import '../services/user_service.dart';
 import '../screens/profile_screen.dart'; // Import ProfileScreen here
+import '../state/user_state.dart'; // Import UserState
 
 class UserService {
   //static const String baseUrl = 'http://10.8.144.101:5000'; // Flask API URL
-  static const String baseUrl = 'http://192.168.18.15:5000';  // your PC IP here
+  static const String baseUrl = 'http://192.168.18.16:5000';  // your PC IP here
 
 
   // Login API
@@ -89,8 +91,16 @@ class _LoginScreenState extends State<LoginScreen> {
             builder: (context) => ProfileScreen(
               username: response['user']['username'],
               isLoggedIn: true,
+              userId: int.parse(response['user']['id'].toString()), // <-- add this if needed
             ),
           ),
+        );
+
+        // Update user state
+        Provider.of<UserState>(context, listen: false).login(
+          response['user']['username'],
+          int.parse(response['user']['id'].toString()),
+          response['user']['allergens'] == null ? [] : List<String>.from(jsonDecode(response['user']['allergens'])),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

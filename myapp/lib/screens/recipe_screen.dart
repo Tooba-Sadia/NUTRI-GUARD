@@ -1,74 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../routes/app_router.dart';
+import '../state/user_state.dart';
 import '../theme/app_theme.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'allergen_entry_screen.dart';
 
 class RecipeScreen extends StatefulWidget {
   const RecipeScreen({super.key});
 
   @override
-  RecipeScreenState createState() => RecipeScreenState(); // Corrected State class name
+  State<RecipeScreen> createState() => _RecipeScreenState();
 }
 
-class RecipeScreenState extends State<RecipeScreen> { // Corrected State class name
-  final List<Recipe> _recipes = [
-    Recipe(
-      name: 'Mediterranean Salad',
-      description:
-          'A healthy and refreshing salad with fresh vegetables and olive oil dressing',
-      calories: 320,
-      prepTime: '15 mins',
-      imageUrl: 'https://example.com/mediterranean-salad.jpg',
-      ingredients: [
-        'Mixed greens',
-        'Cherry tomatoes',
-        'Cucumber',
-        'Red onion',
-        'Olives',
-        'Feta cheese',
-        'Olive oil',
-        'Balsamic vinegar',
-      ],
-    ),
-    Recipe(
-      name: 'Grilled Chicken Bowl',
-      description:
-          'Protein-rich bowl with grilled chicken, quinoa, and roasted vegetables',
-      calories: 450,
-      prepTime: '25 mins',
-      imageUrl: 'https://example.com/chicken-bowl.jpg',
-      ingredients: [
-        'Chicken breast',
-        'Quinoa',
-        'Broccoli',
-        'Sweet potato',
-        'Avocado',
-        'Lemon juice',
-        'Herbs',
-      ],
-    ),
-    Recipe(
-      name: 'Vegetable Stir-Fry',
-      description:
-          'Quick and nutritious stir-fry with colorful vegetables and tofu',
-      calories: 380,
-      prepTime: '20 mins',
-      imageUrl: 'https://example.com/stir-fry.jpg',
-      ingredients: [
-        'Tofu',
-        'Broccoli',
-        'Bell peppers',
-        'Snap peas',
-        'Carrots',
-        'Soy sauce',
-        'Ginger',
-        'Garlic',
-      ],
-    ),
-  ];
+class _RecipeScreenState extends State<RecipeScreen> {
+  List<dynamic> recipes = [];
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userState = Provider.of<UserState>(context, listen: false);
+      if (userState.isLoggedIn &&
+          userState.allergens.isNotEmpty &&
+          userState.allergens.any((a) => a.trim().isNotEmpty)) {
+        fetchRecipes();
+      }
+    });
+  }
+
+  Future<void> fetchRecipes() async {
+    final userState = Provider.of<UserState>(context, listen: false);
+    setState(() {
+      loading = true;
+    });
+    final response = await http.post(
+      Uri.parse('http://192.168.18.18:5000/recipes/recommend'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'allergens': userState.allergens}),
+    );
+    final data = jsonDecode(response.body);
+    setState(() {
+      recipes = data['recipes'];
+      loading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final userState = Provider.of<UserState>(context);
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
@@ -80,166 +64,131 @@ class RecipeScreenState extends State<RecipeScreen> { // Corrected State class n
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.go(AppRoutes.home), // Redirect to Home
+          onPressed: () => context.go(AppRoutes.home),
         ),
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.primaryColor,
-              AppTheme.backgroundColor,
-            ],
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Healthy Recipes',
-                style: AppTheme.subheadingStyle.copyWith(
-                  color: Colors.white,
-                ),
-              ),
+        actions: [
+          if (!userState.isLoggedIn)
+            TextButton(
+              onPressed: () => context.go(AppRoutes.login),
+              child: const Text('Login', style: TextStyle(color: Colors.white)),
+            )
+          else
+            TextButton(
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AllergenEntryScreen()),
+                );
+                setState(() {}); // Refresh recipes if allergens changed
+                fetchRecipes();
+              },
+              child: const Text('Edit Allergens', style: TextStyle(color: Colors.white)),
             ),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: _recipes.length,
-                itemBuilder: (context, index) {
-                  final recipe = _recipes[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
+        ],
+      ),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : recipes.isEmpty
+              ? const Center(child: Text('No safe recipes found!'))
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (userState.isLoggedIn && userState.allergens.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Wrap(
+                          spacing: 8,
+                          children: userState.allergens
+                              .map((a) => Chip(label: Text(a)))
+                              .toList(),
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(20),
-                          ),
-                          child: Image.network(
-                            recipe.imageUrl,
-                            height: 200,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                height: 200,
-                                color: AppTheme.primaryLightColor,
-                                child: Icon(
-                                  Icons.restaurant_rounded,
-                                  size: 50,
-                                  color: AppTheme.primaryColor,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                recipe.name,
-                                style: AppTheme.subheadingStyle.copyWith(
-                                  color: AppTheme.primaryColor,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                recipe.description,
-                                style: AppTheme.bodyStyle.copyWith(
-                                  color: AppTheme.textSecondaryColor,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  _buildRecipeInfo(
-                                    Icons.local_fire_department_rounded,
-                                    '${recipe.calories} cal',
-                                  ),
-                                  const SizedBox(width: 16),
-                                  _buildRecipeInfo(
-                                    Icons.timer_rounded,
-                                    recipe.prepTime,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  // Show recipe details
-                                },
-                                style: AppTheme.primaryButtonStyle,
-                                child: const Text('View Recipe'),
-                              ),
+                      ),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              AppTheme.primaryColor,
+                              AppTheme.backgroundColor,
                             ],
                           ),
                         ),
-                      ],
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: recipes.length,
+                          itemBuilder: (context, index) {
+                            final recipe = recipes[index];
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(20),
+                                    ),
+                                    child: Image.network(
+                                      recipe['image'] ?? '',
+                                      height: 200,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Container(
+                                          height: 200,
+                                          color: AppTheme.primaryLightColor,
+                                          child: Icon(
+                                            Icons.restaurant_rounded,
+                                            size: 50,
+                                            color: AppTheme.primaryColor,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          recipe['title'] ?? 'No Title',
+                                          style: AppTheme.subheadingStyle.copyWith(
+                                            color: AppTheme.primaryColor,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'ID: ${recipe['id']}',
+                                          style: AppTheme.bodyStyle.copyWith(
+                                            color: AppTheme.textSecondaryColor,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+                  ],
+                ),
     );
   }
-
-  Widget _buildRecipeInfo(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          size: 16,
-          color: AppTheme.textSecondaryColor,
-        ),
-        const SizedBox(width: 4),
-        Text(
-          text,
-          style: AppTheme.bodyStyle.copyWith(
-            color: AppTheme.textSecondaryColor,
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class Recipe {
-  final String name;
-  final String description;
-  final int calories;
-  final String prepTime;
-  final String imageUrl;
-  final List<String> ingredients;
-
-  Recipe({
-    required this.name,
-    required this.description,
-    required this.calories,
-    required this.prepTime,
-    required this.imageUrl,
-    required this.ingredients,
-  });
 }

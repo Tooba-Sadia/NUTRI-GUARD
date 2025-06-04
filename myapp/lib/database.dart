@@ -4,7 +4,7 @@ class DatabaseHelper {
   static Future<MySqlConnection> _connect() async {
     return await MySqlConnection.connect(
       ConnectionSettings(
-  host: '192.168.18.19',  // From ipconfig (not localhost)
+  host: '192.168.18.16',  // From ipconfig (not localhost)
   port: 3306,
   user: 'flutter_user',
   password: 'FlutterPass123!',
