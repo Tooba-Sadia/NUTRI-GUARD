@@ -24,10 +24,12 @@ class _RecipeScreenState extends State<RecipeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userState = Provider.of<UserState>(context, listen: false);
-      if (userState.isLoggedIn &&
-          userState.allergens.isNotEmpty &&
-          userState.allergens.any((a) => a.trim().isNotEmpty)) {
+      if (userState.isLoggedIn) {
         fetchRecipes();
+      } else {
+        setState(() {
+          loading = false;
+        });
       }
     });
   }
@@ -38,7 +40,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
       loading = true;
     });
     final response = await http.post(
-      Uri.parse('http://192.168.18.18:5000/recipes/recommend'),
+      Uri.parse('http://192.168.18.16:5000/recipes/recommend'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'allergens': userState.allergens}),
     );
@@ -79,7 +81,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   context,
                   MaterialPageRoute(builder: (context) => const AllergenEntryScreen()),
                 );
-                setState(() {}); // Refresh recipes if allergens changed
+                // Always fetch recipes after editing allergens
                 fetchRecipes();
               },
               child: const Text('Edit Allergens', style: TextStyle(color: Colors.white)),

@@ -43,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
           const SnackBar(content: Text('Login successful!')),
         );
         final user = response['user'];
+        // ignore: unused_local_variable
         final userId = int.parse(user['id'].toString());
         Provider.of<UserState>(context, listen: false).login(
           response['user']['username'],
