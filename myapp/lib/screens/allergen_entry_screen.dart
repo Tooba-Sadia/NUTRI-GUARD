@@ -17,7 +17,15 @@ class AllergenEntryScreen extends StatefulWidget {
 
 class _AllergenEntryScreenState extends State<AllergenEntryScreen> {
   final TextEditingController _controller = TextEditingController();
-  final List<String> _allergens = [];
+  List<String> _allergens = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill with current allergens
+    final userState = Provider.of<UserState>(context, listen: false);
+    _allergens = List<String>.from(userState.allergens);
+  }
 
   void _addAllergen() {
     final text = _controller.text.trim();
