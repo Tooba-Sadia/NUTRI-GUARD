@@ -7,6 +7,7 @@ import '../theme/app_theme.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'allergen_entry_screen.dart';
+import 'recipe_detail_screen.dart';
 
 class RecipeScreen extends StatefulWidget {
   const RecipeScreen({super.key});
@@ -122,67 +123,77 @@ class _RecipeScreenState extends State<RecipeScreen> {
                           itemCount: recipes.length,
                           itemBuilder: (context, index) {
                             final recipe = recipes[index];
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 5),
+                            return InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RecipeDetailScreen(recipeId: recipe['id']),
                                   ),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(20),
+                                );
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 5),
                                     ),
-                                    child: Image.network(
-                                      recipe['image'] ?? '',
-                                      height: 200,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Container(
-                                          height: 200,
-                                          color: AppTheme.primaryLightColor,
-                                          child: Icon(
-                                            Icons.restaurant_rounded,
-                                            size: 50,
-                                            color: AppTheme.primaryColor,
-                                          ),
-                                        );
-                                      },
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(20),
+                                      ),
+                                      child: Image.network(
+                                        recipe['image'] ?? '',
+                                        height: 200,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Container(
+                                            height: 200,
+                                            color: AppTheme.primaryLightColor,
+                                            child: Icon(
+                                              Icons.restaurant_rounded,
+                                              size: 50,
+                                              color: AppTheme.primaryColor,
+                                            ),
+                                          );
+                                        },
+                                      ),
                                     ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          recipe['title'] ?? 'No Title',
-                                          style: AppTheme.subheadingStyle.copyWith(
-                                            color: AppTheme.primaryColor,
+                                    Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            recipe['title'] ?? 'No Title',
+                                            style: AppTheme.subheadingStyle.copyWith(
+                                              color: AppTheme.primaryColor,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          'ID: ${recipe['id']}',
-                                          style: AppTheme.bodyStyle.copyWith(
-                                            color: AppTheme.textSecondaryColor,
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'ID: ${recipe['id']}',
+                                            style: AppTheme.bodyStyle.copyWith(
+                                              color: AppTheme.textSecondaryColor,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 16),
-                                      ],
+                                          const SizedBox(height: 16),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             );
                           },
