@@ -6,6 +6,7 @@ import '../routes/app_router.dart';
 import '../theme/app_theme.dart';
 import '../services/user_service.dart';
 import '../state/user_state.dart';
+import 'reset_password_screen.dart'; // Import the ResetPasswordScreen
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -118,6 +119,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 context.go(AppRoutes.signup); // Navigate to Sign Up screen
               },
               child: const Text('Don\'t have an account? Sign Up'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ResetPasswordScreen()),
+                );
+              },
+              child: const Text('Forgot Password?'),
             ),
           ],
         ),

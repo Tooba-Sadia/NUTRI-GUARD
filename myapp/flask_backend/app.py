@@ -29,11 +29,17 @@ def signup():
     password = data['password']
     username = data['username']
 
+    # Hash the password
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        cursor.execute("INSERT INTO users (email, password, username) VALUES (%s, %s, %s)", (email, password, username))
+        cursor.execute(
+            "INSERT INTO users (email, password, username) VALUES (%s, %s, %s)",
+            (email, hashed_password, username)
+        )
         conn.commit()
         return jsonify({'status': 'success', 'message': 'Signup successful'}), 201
     except Exception as e:
@@ -51,13 +57,15 @@ def login():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT * FROM users WHERE email = %s AND password = %s", (email, password))
+    cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
     user = cursor.fetchone()
 
     cursor.close()
     conn.close()
 
-    if user:
+    if user and bcrypt.check_password_hash(user['password'], password):
+        # Remove password from user dict before sending
+        user.pop('password', None)
         return jsonify({'status': 'success', 'message': 'Login successful', 'user': user})
     else:
         return jsonify({'status': 'error', 'message': 'Invalid credentials'})
@@ -98,6 +106,31 @@ def recommend_recipes():
     response = requests.get(url)
     recipes = response.json().get('results', [])
     return jsonify({'recipes': recipes})
+
+@app.route('/reset_password', methods=['POST'])
+def reset_password():
+    data = request.get_json()
+    email = data.get('email')
+    new_password = data.get('new_password')
+
+    if not email or not new_password:
+        return jsonify({'status': 'error', 'message': 'Email and new password required'}), 400
+
+    # Hash the new password
+    hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET password=%s WHERE email=%s", (hashed_password, email))
+    conn.commit()
+    updated = cursor.rowcount
+    cursor.close()
+    conn.close()
+
+    if updated:
+        return jsonify({'status': 'success', 'message': 'Password reset successful'})
+    else:
+        return jsonify({'status': 'error', 'message': 'User not found'}), 404
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
