@@ -41,7 +41,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
       loading = true;
     });
     final response = await http.post(
-      Uri.parse('http://192.168.18.16:5000/recipes/recommend'),
+      Uri.parse('https://fd26-2407-d000-d-7b7f-516d-ab17-251d-b11b.ngrok-free.app/recipes/recommend'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'allergens': userState.allergens}),
     );

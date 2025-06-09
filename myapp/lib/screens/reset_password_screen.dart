@@ -17,7 +17,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   Future<void> _resetPassword() async {
     setState(() => loading = true);
     final response = await http.post(
-      Uri.parse('http://192.168.18.16:5000/reset_password'),
+      Uri.parse('https://fd26-2407-d000-d-7b7f-516d-ab17-251d-b11b.ng/reset_password'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': _emailController.text.trim(),

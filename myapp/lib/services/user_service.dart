@@ -9,7 +9,8 @@ import '../state/user_state.dart'; // Import UserState
 
 class UserService {
   //static const String baseUrl = 'http://10.8.144.101:5000'; // Flask API URL
-  static const String baseUrl = 'http://192.168.18.16:5000';  // your PC IP here
+  static const String baseUrl = 'https://fd26-2407-d000-d-7b7f-516d-ab17-251d-b11b.ngrok-free.app';  // your PC IP here
+
 
 
   // Login API
