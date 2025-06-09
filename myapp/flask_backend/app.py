@@ -102,10 +102,22 @@ def recommend_recipes():
     data = request.json
     allergens = data.get('allergens', [])
     exclude = ','.join(allergens)
-    url = f'https://api.spoonacular.com/recipes/complexSearch?apiKey={SPOONACULAR_API_KEY}&excludeIngredients={exclude}&number=10'
+    url = f'https://api.spoonacular.com/recipes/complexSearch?apiKey=357b073edf8b4c059217c3f6eec6e283&number=10'
     response = requests.get(url)
     recipes = response.json().get('results', [])
-    return jsonify({'recipes': recipes})
+
+    safe_recipes = []
+    for recipe in recipes:
+        recipe_id = recipe['id']
+        detail_url = f'https://api.spoonacular.com/recipes/{recipe_id}/information?apiKey=357b073edf8b4c059217c3f6eec6e283'
+        detail_resp = requests.get(detail_url)
+        if detail_resp.status_code == 200:
+            details = detail_resp.json()
+            ingredient_names = [i['name'] for i in details.get('extendedIngredients', [])]
+            # Check if any allergen is present in the ingredient names
+            if not any(allergen.lower() in ingredient.lower() for allergen in allergens for ingredient in ingredient_names):
+                safe_recipes.append(recipe)
+    return jsonify({'recipes': safe_recipes})
 
 @app.route('/reset_password', methods=['POST'])
 def reset_password():
