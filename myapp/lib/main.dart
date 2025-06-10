@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:provider/provider.dart'; // Ensure this import is present for Provider
+import 'package:provider/provider.dart'; // Provider for state management
 import 'routes/app_router.dart';
 import 'dart:async';
 import 'theme/app_theme.dart';
 import 'theme/themenotifier.dart';
 import 'state/user_state.dart';
+import 'utils/tflite.dart';
 
+// Global list to hold available cameras
 List<CameraDescription> cameras = [];
 
 Future<void> main() async {
-  // Ensure Flutter is properly initialized before doing anything
+  // Ensure Flutter bindings are initialized before any async code
   WidgetsFlutterBinding.ensureInitialized();
+
   
-  // Add this line to give the Flutter engine time to fully initialize
+
+  // Give the engine a moment to finish initializing
   await Future.delayed(const Duration(milliseconds: 500));
   
   try {
-    // First camera initialization attempt
+    // First attempt to get available cameras
     print('First attempt to get cameras...');
     try {
       cameras = await availableCameras();
@@ -25,7 +29,7 @@ Future<void> main() async {
     } catch (e) {
       print('First attempt failed: $e');
       
-      // Wait a moment and try again
+      // Wait a moment and try again if the first attempt fails
       await Future.delayed(const Duration(seconds: 1));
       
       try {
@@ -34,20 +38,19 @@ Future<void> main() async {
         print('Second attempt found ${cameras.length} cameras');
       } catch (e) {
         print('Second attempt failed: $e');
-        cameras = [];
+        cameras = []; // Set to empty if both attempts fail
       }
     }
   } catch (e) {
     print('Error during camera initialization: $e'); 
-    cameras = [];
+    cameras = []; // Set to empty if any error occurs
   }
   
-  // Run the app after all initialization attempts
+  // Run the main app with providers after initialization
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => UserState()),
-        // ...other providers...
+        ChangeNotifierProvider(create: (_) => UserState()), // User state provider
       ],
       child: const MyApp(),
     ),
@@ -59,16 +62,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Listen to theme changes and rebuild the app accordingly
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: AppTheme.themeNotifier,
       builder: (context, themeMode, _) {
         print('Rebuilding app with theme: $themeMode');
         return MaterialApp.router(
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: themeMode,
-          routerConfig: AppRouter.router,
-          title: 'NutriGuard',
+          theme: AppTheme.lightTheme, // Light theme
+          darkTheme: AppTheme.darkTheme, // Dark theme
+          themeMode: themeMode, // Current theme mode
+          routerConfig: AppRouter.router, // App routes
+          title: 'NutriGuard', // App title
         );
       },
     );

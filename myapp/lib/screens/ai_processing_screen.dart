@@ -5,33 +5,38 @@ import 'dart:convert';
 import '../routes/app_router.dart';
 import '../theme/app_theme.dart';
 import '../utils/allergen_classifier.dart';
+import '../utils/config.dart';
 
+// Stateful widget for AI Processing Screen
 class AIProcessingScreen extends StatefulWidget {
-  final String text;
+  final String text; // Text to be analyzed
 
-  const AIProcessingScreen(
-      {super.key, required this.text}); // Constructor with required text
+  const AIProcessingScreen({
+    super.key,
+    required this.text, // Constructor with required text
+  });
 
   @override
   AIProcessingScreenState createState() => AIProcessingScreenState();
 }
 
 class AIProcessingScreenState extends State<AIProcessingScreen> {
-  bool _isProcessing = true;
-  String _result = '';
-  String? _error;
+  bool _isProcessing = true; // Indicates if processing is ongoing
+  String _result = ''; // Stores the result from the API
+  String? _error; // Stores any error message
 
   @override
   void initState() {
     super.initState();
-    _processText();
+    _processText(); // Start processing when the screen is initialized
   }
 
+  // Function to call the Flask API and process the text
   Future<void> _processText() async {
     try {
-      // Call the Flask API
+      // Call the Flask API with the input text
       final response = await http.post(
-        Uri.parse('http://192.168.18.39:5050/check_allergens/'), 
+        Uri.parse('${AppConfig.baseUrl}/predict'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'text': widget.text}),
       );
@@ -41,18 +46,21 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
         final analysisResult = jsonDecode(response.body);
 
         setState(() {
+          // Format the result string for display
           _result = '''
         Final Decision: ${analysisResult['final_decision']}
         Model Prediction: ${analysisResult['model_prediction']}
         High-Risk Ingredients: ${analysisResult['high_risk_ingredients']}
         Potential Risks: ${analysisResult['potential_risks']}
       ''';
-          _isProcessing = false;
+          _isProcessing = false; // Processing complete
         });
       } else {
+        // Handle non-200 responses
         throw Exception('Failed to analyze text. Status code: ${response.statusCode}');
       }
     } catch (e) {
+      // Handle errors and update the UI
       if (mounted) {
         setState(() {
           _error = e.toString();
@@ -65,7 +73,7 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: AppTheme.backgroundColor, // Set background color
       appBar: AppBar(
         title: const Text(
           'AI Analysis',
@@ -75,7 +83,7 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
         elevation: 0, // No shadow under the app bar
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.go(AppRoutes.home),
+          onPressed: () => context.go(AppRoutes.home), // Navigate back to home
         ),
       ),
       body: Container(
@@ -90,17 +98,15 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
           ),
         ),
         child: _isProcessing
+            // Show loading indicator while processing
             ? Center(
                 child: Column(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center, // Center the content vertically
+                  mainAxisAlignment: MainAxisAlignment.center, // Center vertically
                   children: [
                     const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.white), // Loading indicator color
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white), // Loading indicator color
                     ),
-                    const SizedBox(
-                        height: 24), // Space between the indicator and text
+                    const SizedBox(height: 24), // Space between indicator and text
                     Text(
                       'Analyzing nutritional information...', // Loading message
                       style: AppTheme.subheadingStyle.copyWith(
@@ -110,6 +116,7 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
                   ],
                 ),
               )
+            // Show error message if any error occurs
             : _error != null
                 ? Center(
                     child: Column(
@@ -120,8 +127,7 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
                           size: 64,
                           color: AppTheme.errorColor,
                         ),
-                        const SizedBox(
-                            height: 16), // Space between icon and text
+                        const SizedBox(height: 16), // Space between icon and text
                         Text(
                           'Error analyzing text',
                           style: AppTheme.subheadingStyle.copyWith(
@@ -151,15 +157,15 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
                       ],
                     ),
                   )
+                // Show the result if processing is complete and no error
                 : SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment
-                          .stretch, // Stretch the column to fill the width
+                      crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch to fill width
                       children: [
+                        // Card showing the original text
                         Container(
-                          padding: const EdgeInsets.all(
-                              16), // Padding inside the card
+                          padding: const EdgeInsets.all(16), // Padding inside the card
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
@@ -189,6 +195,7 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
                           ),
                         ),
                         const SizedBox(height: 24),
+                        // Card showing the AI analysis result
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
@@ -220,6 +227,7 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
                           ),
                         ),
                         const SizedBox(height: 24),
+                        // Button to go back to home
                         ElevatedButton(
                           onPressed: () => context.go(AppRoutes.home),
                           style: AppTheme.accentButtonStyle,

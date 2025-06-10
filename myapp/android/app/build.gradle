@@ -30,6 +30,10 @@ android {
     //compileSdk = flutter.compileSdkVersion
     ndkVersion = "26.1.10909125"
 
+    aaptOptions {
+        noCompress 'tflite' 
+        noCompress 'lite'
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8

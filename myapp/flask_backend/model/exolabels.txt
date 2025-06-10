@@ -1,0 +1,23 @@
+alcohol
+almonds
+anchovies
+celery
+chicken
+cocoa
+coconut
+dairy
+eggs
+fish
+ghee
+milk
+mustard
+nuts
+oats
+peanuts
+pine nuts
+pork
+rice
+shellfish
+soybeans
+strawberries
+wheat

@@ -6,7 +6,7 @@ class AllergenClassifier {
   /// Loads the TFLite model from the assets folder
   Future<void> loadModel() async {
     try {
-      _interpreter = await Interpreter.fromAsset('allergen_model.tflite');
+      _interpreter = await Interpreter.fromAsset('bert.tflite');
       print('✅ TFLite model loaded successfully!');
     } catch (e) {
       print('❌ Failed to load TFLite model: $e');

@@ -34,8 +34,8 @@ class CameraScreenState extends State<CameraScreen> {
         // Encode the image path to make it URL-safe eg space to %20
         final String encodedPath = Uri.encodeComponent(imagePath);
 
-        debugPrint('Captured image path: $imagePath');
-        debugPrint('Encoded path: $encodedPath');
+        debugPrint('🪻🪻🪻🪻🪻🪻🪻🪻🪻🪻Captured image path: $imagePath');
+        debugPrint('🪻🪻🪻🪻🪻🪻🪻🪻🪻🪻Encoded path: $encodedPath');
 
         if (!mounted) return;
         // Navigate to the image view screen with the encoded path

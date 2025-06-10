@@ -5,6 +5,7 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import '../routes/app_router.dart';
 import '../theme/app_theme.dart';
 
+//add img crop to this page --------------------------------------------------------------------------------------------------------------------
 class ImageViewPage extends StatefulWidget {
   final String imagePath;
 
@@ -52,7 +53,6 @@ class ImageViewPageState extends State<ImageViewPage> {
           debugPrint('Line: ${line.text}');
           for (final element in line.elements) {
             debugPrint('Element: ${element.text}');
-            _preprocessText(element.text); // Preprocess each text element
           }
         }
       }
@@ -78,18 +78,7 @@ class ImageViewPageState extends State<ImageViewPage> {
     }
   }
 
-  String _preprocessText(String rawText) {
-    // Preprocess the text to remove unwanted characters or format it
-    String cleanText = rawText.toLowerCase(); // Convert to lowercase
-    cleanText = cleanText.replaceAll(RegExp(r'[^\w\s,]'), ''); // Remove special characters
-    cleanText = cleanText.replaceAll(RegExp(r'\s+'), ' '); // Replace multiple spaces with a single space
-    cleanText = cleanText.replaceAll('mlik', 'milk'); // Fix common OCR misreads
-    cleanText = cleanText.replaceAll('s0y', 'soy');
-    cleanText = cleanText.replaceAll('whey ', 'whey');
-    return cleanText.trim(); // Trim leading/trailing spaces
-  }
-
-  @override
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -186,9 +175,10 @@ class ImageViewPageState extends State<ImageViewPage> {
                         const SizedBox(height: 24),
                         ElevatedButton(
                           onPressed: () {
-                            final encodedText =
-                                Uri.encodeComponent(_recognizedText);
-                            context.go('${AppRoutes.aiProcessing}/$encodedText'); // Navigate to AI processing
+                            
+                            final encodedText = Uri.encodeComponent(_recognizedText); // Encode the text
+                            debugPrint('🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊Encoded text: $encodedText');
+                            context.go('${AppRoutes.aiProcessing}?text=${Uri.encodeComponent(_recognizedText)}&mode=advanced');
                           },
                           style: AppTheme.accentButtonStyle,
                           child: const Padding(
