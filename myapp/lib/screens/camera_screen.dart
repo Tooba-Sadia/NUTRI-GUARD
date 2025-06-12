@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import '../routes/app_router.dart';
 import '../theme/app_theme.dart';
 
@@ -17,6 +18,7 @@ class CameraScreenState extends State<CameraScreen> {
   final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
 
+  // ignore: unused_element
   Future<void> _captureImage() async {
     try {
       setState(() {
@@ -48,6 +50,61 @@ class CameraScreenState extends State<CameraScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error capturing image: $e'),
+          backgroundColor: AppTheme.errorColor,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> pickAndCropImage() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      final XFile? pickedFile = await _picker.pickImage(source: ImageSource.camera);
+
+      if (pickedFile != null) {
+        final CroppedFile? croppedFile = await ImageCropper().cropImage(
+          sourcePath: pickedFile.path,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9,
+          ],
+          uiSettings: [
+            AndroidUiSettings(
+              toolbarTitle: 'Crop Image',
+              toolbarColor: Colors.green,
+              toolbarWidgetColor: Colors.white,
+              initAspectRatio: CropAspectRatioPreset.original,
+              lockAspectRatio: false,
+            ),
+            IOSUiSettings(
+              title: 'Crop Image',
+            ),
+          ],
+        );
+
+        if (croppedFile != null) {
+          final String croppedPath = croppedFile.path;
+          final String encodedPath = Uri.encodeComponent(croppedPath);
+          if (!mounted) return;
+          context.go('${AppRoutes.imageView}/$encodedPath');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error capturing or cropping image: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error capturing or cropping image: $e'),
           backgroundColor: AppTheme.errorColor,
         ),
       );
@@ -124,7 +181,7 @@ class CameraScreenState extends State<CameraScreen> {
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: _captureImage,
+                      onPressed: pickAndCropImage, // <-- use the cropper-enabled method
                       style: AppTheme.primaryButtonStyle,
                       child: const Padding(
                         padding: EdgeInsets.symmetric(
