@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myapp/services/googlesignin.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import '../routes/app_router.dart';
@@ -7,6 +8,7 @@ import '../theme/app_theme.dart';
 import '../services/user_service.dart';
 import '../state/user_state.dart';
 import 'reset_password_screen.dart'; // Import the ResetPasswordScreen
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,6 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final response = await UserService.login(
         _emailController.text,
+        _passwordController.text,
         _passwordController.text,
       );
       print('Login successful: $response');
@@ -70,6 +73,40 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    try {
+      final result = await GoogleSignInService.signInAndSendToBackend();
+      if (result != null && result['status'] == 'success') {
+        // Proceed to home or show success
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Signed in as ${result['user']['username']}')),
+        );
+        Provider.of<UserState>(context, listen: false).login(
+          result['user']['username'],
+          int.parse(result['user']['id'].toString()),
+          result['user']['allergens'] == null
+              ? []
+              : (result['user']['allergens'] is List
+                  ? List<String>.from(result['user']['allergens'])
+                  : List<String>.from(jsonDecode(result['user']['allergens']))),
+        );
+        context.go(AppRoutes.home);
+      } else if (result != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Google sign-in failed')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Google sign-in failed: No response from server')),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sign in failed: $error')),
+      );
     }
   }
 
@@ -125,10 +162,24 @@ class _LoginScreenState extends State<LoginScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const ResetPasswordScreen()),
+                    builder: (context) => const ResetPasswordScreen(),
+                  ),
                 );
               },
               child: const Text('Forgot Password?'),
+            ),
+            const SizedBox(height: 16),
+
+            ElevatedButton.icon(
+              icon: const Icon(Icons.login),
+              label: const Text('Sign in with Google'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                minimumSize: const Size(double.infinity, 50),
+                side: const BorderSide(color: Colors.grey),
+              ),
+              onPressed: _signInWithGoogle,
             ),
           ],
         ),
@@ -137,9 +188,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
+// Remove this misplaced and malformed ThemeNotifier class from here.
+// If you need ThemeNotifier, define it in its own file or above the LoginScreen class as shown below:
+
+/*
 class ThemeNotifier extends ChangeNotifier {
   bool _isDarkMode = false;
-
   bool get isDarkMode => _isDarkMode;
 
   void toggleTheme() {
@@ -147,3 +201,4 @@ class ThemeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 }
+*/

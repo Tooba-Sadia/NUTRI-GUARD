@@ -40,7 +40,10 @@ dependencies:
   tflite_flutter: ^0.11.0
   mysql1: ^0.20.0
   image_cropper: ^5.0.1
-  
+
+  google_sign_in: ^6.1.0
+
+
 
 
   #tflite_flutter_helper: ^0.3.1
