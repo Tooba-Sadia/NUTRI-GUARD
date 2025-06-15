@@ -43,7 +43,7 @@ class _AllergenEntryScreenState extends State<AllergenEntryScreen> {
     print('Saving allergens for userId: $userId, allergens: $_allergens');
     try {
       final response = await http.post(
-        Uri.parse('https://fd26-2407-d000-d-7b7f-516d-ab17-251d-b11b.ngrok-free.app/user/allergens'),
+        Uri.parse('https://db37-2407-d000-d-33c2-15fd-c4ba-2d0-db4d.ngrok-free.app/user/allergens'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'user_id': userId, 'allergens': _allergens}),
       );

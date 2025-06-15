@@ -40,16 +40,35 @@ class _RecipeScreenState extends State<RecipeScreen> {
     setState(() {
       loading = true;
     });
-    final response = await http.post(
-      Uri.parse('https://fd26-2407-d000-d-7b7f-516d-ab17-251d-b11b.ngrok-free.app/recipes/recommend'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'allergens': userState.allergens}),
-    );
-    final data = jsonDecode(response.body);
-    setState(() {
-      recipes = data['recipes'];
-      loading = false;
-    });
+    try {
+      final response = await http.post(
+        Uri.parse('https://db37-2407-d000-d-33c2-15fd-c4ba-2d0-db4d.ngrok-free.app/recipes/recommend'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'allergens': userState.allergens}),
+      ).timeout(const Duration(seconds: 10)); // <-- Add timeout
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          recipes = data['recipes'] ?? [];
+          loading = false;
+        });
+      } else {
+        setState(() {
+          loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to fetch recipes: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        loading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching recipes: $e')),
+      );
+    }
   }
 
   @override
