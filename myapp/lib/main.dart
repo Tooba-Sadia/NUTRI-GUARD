@@ -68,6 +68,8 @@ class MyApp extends StatelessWidget {
       builder: (context, themeMode, _) {
         print('Rebuilding app with theme: $themeMode');
         return MaterialApp.router(
+          debugShowCheckedModeBanner: false, // <--- Add this line
+
           theme: AppTheme.lightTheme, // Light theme
           darkTheme: AppTheme.darkTheme, // Dark theme
           themeMode: themeMode, // Current theme mode
