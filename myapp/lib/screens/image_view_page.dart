@@ -177,7 +177,7 @@ class ImageViewPageState extends State<ImageViewPage> {
                           onPressed: () {
                             
                             final encodedText = Uri.encodeComponent(_recognizedText); // Encode the text
-                            debugPrint('🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊🌊Encoded text: $encodedText');
+                            debugPrint('Ecoded text: $encodedText');
                             context.go('${AppRoutes.aiProcessing}?text=${Uri.encodeComponent(_recognizedText)}&mode=advanced');
                           },
                           style: AppTheme.accentButtonStyle,

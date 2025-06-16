@@ -22,8 +22,16 @@ class AIProcessingScreen extends StatefulWidget {
 
 class AIProcessingScreenState extends State<AIProcessingScreen> {
   bool _isProcessing = true; // Indicates if processing is ongoing
-  String _result = ''; // Stores the result from the API
+  //String _result = ''; // Stores the result from the API
   String? _error; // Stores any error message
+  String? detectedAllergen;
+  String? potentialAllergens;
+  String? confidence;
+  String? finalDecision;
+  String? highRiskIngredients;
+  Map<String, dynamic> modelPrediction = {}; // Stores model predictions
+  String formattedPredictions = ''; // Formatted string for model predictions
+
 
   @override
   void initState() {
@@ -34,6 +42,9 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
   // Function to call the Flask API and process the text
   Future<void> _processText() async {
     try {
+      setState(() {
+        _isProcessing = true;
+      });
       // Call the Flask API with the input text
       final response = await http.post(
         Uri.parse('${AppConfig.baseUrl}/predict'),
@@ -45,14 +56,26 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
         // Parse the response from the Flask API
         final analysisResult = jsonDecode(response.body);
 
+        // Extract values safely
+        confidence = analysisResult['confidence'] ?? 'N/A';
+        finalDecision = analysisResult['final_decision'] ?? 'N/A';
+        highRiskIngredients = (analysisResult['high_risk_ingredients'] as List?)?.join(', ') ?? 'None';
+        modelPrediction = (analysisResult['model_prediction'] as Map?)?.cast<String, dynamic>() ?? {};
+
+        // Format model predictions
+        formattedPredictions = modelPrediction.entries
+            .map((e) => '${e.key}: ${(e.value as num).toStringAsFixed(2)}')
+            .join(', ');
+
         setState(() {
           // Format the result string for display
-          _result = '''
-        Final Decision: ${analysisResult['final_decision']}
-        Model Prediction: ${analysisResult['model_prediction']}
-        High-Risk Ingredients: ${analysisResult['high_risk_ingredients']}
-        Potential Risks: ${analysisResult['potential_risks']}
-      ''';
+          detectedAllergen = analysisResult['detected_allergen'] ?? 'N/A';
+          confidence = analysisResult['confidence'];
+          finalDecision = analysisResult['final_decision'];
+          highRiskIngredients = (analysisResult['high_risk_ingredients'] as List?)?.join(', ') ?? 'None';
+          modelPrediction = (analysisResult['model_prediction'] as Map?)?.map(
+            (key, value) => MapEntry(key.toString(), ((value as num) * 100)),
+            ) ?? {};
           _isProcessing = false; // Processing complete
         });
       } else {
@@ -164,7 +187,7 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch to fill width
                       children: [
                         // Card showing the original text
-                        Container(
+                       /* Container(
                           padding: const EdgeInsets.all(16), // Padding inside the card
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -177,7 +200,7 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
                               ),
                             ],
                           ),
-                          child: Column(
+                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
@@ -193,14 +216,22 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
                               ),
                             ],
                           ),
-                        ),
+                        ),*/
                         const SizedBox(height: 24),
                         // Card showing the AI analysis result
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            gradient: LinearGradient(
+                              colors: [Colors.white, Colors.blue.shade50],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
                             borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: AppTheme.primaryColor.withOpacity(0.2),
+                              width: 2,
+                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.1),
@@ -212,15 +243,43 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.analytics, color: AppTheme.primaryColor),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'AI Analysis (Allergen)',
+                                    style: AppTheme.subheadingStyle.copyWith(
+                                      color: AppTheme.primaryColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
                               Text(
-                                'AI Analysis',
-                                style: AppTheme.subheadingStyle.copyWith(
-                                  color: AppTheme.primaryColor,
+                                'Final Decision: $finalDecision',
+                                style: AppTheme.bodyStyle.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.redAccent,
                                 ),
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                _result,
+                                'Confidence: $confidence',
+                                style: AppTheme.bodyStyle,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'High-Risk Ingredients: $highRiskIngredients',
+                                style: AppTheme.bodyStyle,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Model Prediction:',
+                                style: AppTheme.bodyStyle.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                formattedPredictions,
                                 style: AppTheme.bodyStyle,
                               ),
                             ],
