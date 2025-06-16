@@ -92,14 +92,14 @@ class HomeScreen extends StatelessWidget {
                   Icons.restaurant_rounded,
                   AppRoutes.recipe,
                 ),
-                const SizedBox(height: 16),
-                _buildFeatureCard(
-                  context,
-                  'BP Monitor',
-                  'Track and monitor your blood pressure readings',
-                  Icons.health_and_safety_rounded,
-                  AppRoutes.bpMonitor,
-                ),
+               // const SizedBox(height: 16),
+                //_buildFeatureCard(
+                  //context,
+                  //'BP Monitor',
+                  //'Track and monitor your blood pressure readings',
+                  //Icons.health_and_safety_rounded,
+                  //AppRoutes.bpMonitor,
+                //),
                 const SizedBox(height: 16),
                 _buildFeatureCard(
                   context,
@@ -263,10 +263,10 @@ class BottomNavScreenState extends State<BottomNavScreen> {
             icon: Icon(Icons.restaurant_rounded),
             label: 'Recipes',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.health_and_safety_rounded),
-            label: 'BP Monitor',
-          ),
+          //BottomNavigationBarItem(
+            //icon: Icon(Icons.health_and_safety_rounded),
+            //label: 'BP Monitor',
+          //),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_rounded),
             label: 'Settings',

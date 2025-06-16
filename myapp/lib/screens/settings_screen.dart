@@ -1,4 +1,4 @@
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../routes/app_router.dart';
@@ -47,8 +47,14 @@ class SettingsScreenState extends State<SettingsScreen> {
           ),
         ],
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => Navigator.of(context).pushReplacementNamed(AppRoutes.home),
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            if (GoRouter.of(context).canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.home); // or your home route
+            }
+          },
         ),
       ),
       body: Container(

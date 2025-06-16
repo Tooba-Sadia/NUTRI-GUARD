@@ -42,7 +42,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
     });
     try {
       final response = await http.post(
-        Uri.parse('https://db37-2407-d000-d-33c2-15fd-c4ba-2d0-db4d.ngrok-free.app/recipes/recommend'),
+        Uri.parse('https://6a8a-2407-d000-d-51ae-f02d-ab60-def7-f982.ngrok-free.app/recipes/recommend'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'allergens': userState.allergens}),
       ).timeout(const Duration(seconds: 10)); // <-- Add timeout

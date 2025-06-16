@@ -39,10 +39,10 @@ class ProfileScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
+            if (GoRouter.of(context).canPop()) {
+              context.pop();
             } else {
-              Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+              context.go(AppRoutes.home);
             }
           },
         ),
