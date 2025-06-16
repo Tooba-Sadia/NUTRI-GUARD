@@ -43,7 +43,7 @@ const String kWelcomeMessage = 'Welcome to NutriGuard!';
 const String kErrorFetchingData = 'Failed to fetch data. Please try again.';
 
 // API
-const String kSpoonacularApiKey = 'your_spoonacular_api_key';
+const String kSpoonacularApiKey = '7bb378a3d04a4accb92f61c3a3ddd940';
 const String kSpoonacularBaseUrl = 'https://api.spoonacular.com';
 const String kRecipeRecommendationEndpoint = '/recipes/findByIngredients';
 

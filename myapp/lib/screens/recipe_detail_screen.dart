@@ -23,8 +23,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
   Future<void> fetchRecipeDetails() async {
     // Replace YOUR_API_KEY with your Spoonacular API key
-    final url = 'https://api.spoonacular.com/recipes/${widget.recipeId}/information?apiKey=357b073edf8b4c059217c3f6eec6e283';
+    final url = 'https://api.spoonacular.com/recipes/${widget.recipeId}/information?apiKey=7bb378a3d04a4accb92f61c3a3ddd940';
     final response = await http.get(Uri.parse(url));
+    print('Recipe details status: ${response.statusCode}');
+    print('Recipe details body: ${response.body}');
     if (response.statusCode == 200) {
       setState(() {
         details = jsonDecode(response.body);

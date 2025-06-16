@@ -11,7 +11,7 @@ import '../state/user_state.dart'; // Import UserState
 class UserService {
   // Flask API base URL
   //static const String baseUrl = 'http://10.8.144.101:5000'; // Flask API URL
-static const String baseUrl = 'https://6a8a-2407-d000-d-51ae-f02d-ab60-def7-f982.ngrok-free.app';
+static const String baseUrl = 'https://a87c-2407-d000-d-6259-6816-38af-1795-350b.ngrok-free.app';
 
   // Login API call
   static Future<Map<String, dynamic>> login(String email, String password, [String text = '']) async {
