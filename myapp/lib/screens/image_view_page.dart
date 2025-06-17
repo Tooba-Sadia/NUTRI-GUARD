@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:myapp/screens/halal_view.dart';
 import '../routes/app_router.dart';
 import '../theme/app_theme.dart';
 
@@ -173,24 +174,59 @@ class ImageViewPageState extends State<ImageViewPage> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: () {
-                            
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  
                             final encodedText = Uri.encodeComponent(_recognizedText); // Encode the text
                             debugPrint('Ecoded text: $encodedText');
                             context.go('${AppRoutes.aiProcessing}?text=${Uri.encodeComponent(_recognizedText)}&mode=advanced');
-                          },
-                          style: AppTheme.accentButtonStyle,
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 15),
-                            child: Text(
-                              'Analyze with AI',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  textStyle: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text('Check Allergens'),
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  final encodedText = Uri.encodeComponent(_recognizedText); // Encode the text
+                                  debugPrint('😀😀😀😀😀😀Encoded text: $encodedText');
+                                  debugPrint('😀😀😀😀😀😀');
+
+                                  context.push('${AppRoutes.halalView}?text=${Uri.encodeComponent(_recognizedText)}&mode=advanced');
+                                  
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  textStyle: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text('Check Halal Status'),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

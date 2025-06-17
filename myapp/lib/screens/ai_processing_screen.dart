@@ -98,11 +98,11 @@ class AIProcessingScreenState extends State<AIProcessingScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor, // Set background color
       appBar: AppBar(
-        title: const Text(
+        
+        backgroundColor: AppTheme.primaryColor,title: const Text(
           'AI Analysis',
           style: AppTheme.headingStyle,
-        ),
-        backgroundColor: AppTheme.primaryColor, // App bar background color
+        ), // App bar background color
         elevation: 0, // No shadow under the app bar
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),

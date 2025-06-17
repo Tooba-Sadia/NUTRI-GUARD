@@ -9,7 +9,9 @@ from extensions import db
 from models import User
 from db_config import get_db_connection
 import tensorflow as tf
-from util.preprocessing import preprocess
+from util.preprocessing import preprocess, preprocess_halal
+from transformers import BertTokenizer
+import os
 
 # Add this near the top of app.py
 ALLERGEN_SYNONYMS = {
@@ -28,6 +30,7 @@ ALLERGEN_SYNONYMS = {
 
 
 #for running:
+
 #cd C:\Users\PMLS\Downloads\NUTRI-GUARD\myapp\flask_backend
 #python app.py
 
@@ -215,18 +218,14 @@ def reset_password():
 
 
 # Tooba Model Start --------------------------------------------------------------------------------------------------------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Load TFLite model for allergen detection
-interpreter = tf.lite.Interpreter(model_path="model/model.tflite")
-interpreter.allocate_tensors()
-
-# Get input/output details from the model
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
+labels_path = os.path.join(BASE_DIR,'model', 'exolabels.txt')
 
 # Load allergen labels
-with open('model/exolabels.txt', 'r') as f:
+with open(labels_path, 'r') as f:
     ALLERGEN_LABELS = [line.strip() for line in f.readlines()]
+# Get the directory where app.py is located
 
 
 
@@ -234,6 +233,17 @@ with open('model/exolabels.txt', 'r') as f:
 # Endpoint for allergen prediction
 @app.route('/predict', methods=['POST'])
 def predict():
+        
+    
+    # Example: Load a file in a 'data' subfolder
+    model_path = os.path.join(BASE_DIR,'model', 'model.tflite')
+    # Load TFLite model for allergen detection
+    interpreter = tf.lite.Interpreter(model_path=model_path)
+    interpreter.allocate_tensors()
+
+    # Get input/output details from the model
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
     # Get input text from request
     data = request.get_json()
     print("Received data:", data)
@@ -271,6 +281,67 @@ def predict():
         "confidence": "High" if model_prediction else "Low"
     }
 
+    return jsonify(response)
+
+
+# Example: Load a file in a 'data' subfolder
+halal_model_path = os.path.join(BASE_DIR, 'halal_model.tflite')
+
+# Check if the halal model file exists
+print(os.path.exists(halal_model_path))
+# Load TFLite model for halal detection
+
+
+# Load tokenizer and e_code mapping once for efficiency
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+e_code_mapping_path = 'e_code_mapping.json'
+
+# Endpoint for halal status check
+@app.route('/halal_check', methods=['POST'])
+def halal_check():
+    halal_interpreter = tf.lite.Interpreter(model_path=halal_model_path)
+    halal_interpreter.allocate_tensors()
+    halal_input_details = halal_interpreter.get_input_details()
+    halal_output_details = halal_interpreter.get_output_details()
+
+    data = request.get_json()
+    text = data.get('text', '')
+    e_code = data.get('e_code', None)
+
+    print("Received text:", text)  # Debug input
+
+    # Preprocess input using your function
+    input_ids,attention_mask,e_code_input = preprocess_halal(
+        text,
+        e_code,
+        tokenizer=tokenizer,
+        e_code_mapping_path=e_code_mapping_path,
+        max_length=128
+    )
+   # Print input details
+    for i, detail in enumerate(halal_interpreter.get_input_details()):
+        print(f"Input {i}: name={detail['name']}, shape={detail['shape']}")
+
+    # Set tensors by name
+    for detail in halal_interpreter.get_input_details():
+        if detail['name'] == 'input_ids':
+            halal_interpreter.set_tensor(detail['index'], input_ids)
+        elif detail['name'] == 'attention_mask':
+            halal_interpreter.set_tensor(detail['index'], attention_mask)
+        elif detail['name'] == 'e_code_input':
+            halal_interpreter.set_tensor(detail['index'], e_code_input)
+    
+    # Run inference
+    halal_interpreter.invoke()
+    output = halal_interpreter.get_tensor(halal_output_details[0]['index'])  # shape: (1, 1)
+    halal_prob = float(output[0][0])
+
+    print("Halal probability:", halal_prob)  # Debug output
+
+    response = {
+        "halal_probability": halal_prob,
+        "halal_status": "Halal" if halal_prob > 0.5 else "Not Halal"
+    }
     return jsonify(response)
 
 # Tooba Model End --------------------------------------------------------------------------------------------------------------------------

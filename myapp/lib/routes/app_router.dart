@@ -13,6 +13,7 @@ import '../screens/profile_screen.dart';
 import '../screens/splash_screen.dart' as splash; 
 import '../screens/login_screen.dart';
 import '../screens/signup_screen.dart';
+import 'package:myapp/screens/halal_view.dart';
 
 // Route names for easy reference throughout the app
 class AppRoutes {
@@ -28,6 +29,8 @@ class AppRoutes {
   static const splash = '/splash';
   static const login = '/login'; // Login route
   static const signup = '/signup'; // Signup route
+  static const halalView = '/halal-view';
+
 }
 
 // Main router configuration for the app
@@ -93,6 +96,14 @@ class AppRouter {
         path: AppRoutes.recipe, // Recipe screen route
         builder: (context, state) => const RecipeScreen(),
       ),
+      // Halal View route with parameter (text)
+      GoRoute(
+        path: AppRoutes.halalView,
+        builder: (context, state) {
+          final text = state.uri.queryParameters['text'] ?? '';
+          return HalalView(text: text);
+        },
+      ),
       // AI Processing route with parameter (text)
             GoRoute(
         path: AppRoutes.aiProcessing,
@@ -114,6 +125,14 @@ class AppRouter {
           );
         },
       ),
+      GoRoute(
+  path: AppRoutes.imageView, // No path parameter
+  builder: (context, state) {
+    return ImageViewPage(
+      imagePath: '', // Provide an empty string as the default value
+    );
+  },
+),
     ],
     // Error page for unknown routes
     errorBuilder: (context, state) => Scaffold(
