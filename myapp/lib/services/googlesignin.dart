@@ -2,6 +2,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:myapp/utils/config.dart';
+
 class GoogleSignInService {
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: [
@@ -36,7 +38,7 @@ class GoogleSignInService {
       final auth = await account.authentication;
 
       final response = await http.post(
-        Uri.parse(' https://db37-2407-d000-d-33c2-15fd-c4ba-2d0-db4d.ngrok-free.app'), // <-- your ngrok URL
+        Uri.parse(AppConfig.baseUrl), // <-- your ngrok URL
         headers: {
           'Content-Type': 'application/json',
         },

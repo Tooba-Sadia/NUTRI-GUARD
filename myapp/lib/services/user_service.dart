@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:myapp/utils/config.dart';
 import 'package:provider/provider.dart'; // Import provider package
 import '../services/user_service.dart';
 import '../screens/profile_screen.dart'; // Import ProfileScreen here
@@ -11,7 +12,7 @@ import '../state/user_state.dart'; // Import UserState
 class UserService {
   // Flask API base URL
   //static const String baseUrl = 'http://10.8.144.101:5000'; // Flask API URL
-static const String baseUrl = ' https://eeaf-121-52-145-236.ngrok-free.app';
+static const String baseUrl = AppConfig.baseUrl;
 
   // Login API call
   static Future<Map<String, dynamic>> login(String email, String password, [String text = '']) async {

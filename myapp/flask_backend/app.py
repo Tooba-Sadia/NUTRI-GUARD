@@ -1,5 +1,6 @@
 # Import required libraries
 import json
+import numpy as np
 import requests
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -143,7 +144,7 @@ def get_allergens(user_id):
     return jsonify({'allergens': []})
 
 # Spoonacular API key for recipe recommendations
-SPOONACULAR_API_KEY = '7bb378a3d04a4accb92f61c3a3ddd940'
+SPOONACULAR_API_KEY = 'c58c7853ee004c26b4de0f0eedaa09fd'
 
 # Endpoint to get allergen-free recipe recommendations
 @app.route('/recipes/recommend', methods=['POST'])
@@ -163,12 +164,12 @@ def recommend_recipes():
     if exclude:
         url += f"&excludeIngredients={exclude}"
     response = requests.get(url)
-    print("Received allergens:", allergens)
-    print("Expanded allergen terms:", allergen_terms)
-    print("Spoonacular URL:", url)
-    print("Spoonacular response:", response.text)
+    print("Received allergens:", allergens, flush=True)
+    print("Expanded allergen terms:", allergen_terms, flush=True)
+    print("Spoonacular URL:", url, flush=True)
+    print("Spoonacular response:", response.text, flush=True)
     recipes = response.json().get('results', [])
-    print("Recipes list:", recipes)
+    print("Recipes list:", recipes, flush=True)
 
     safe_recipes = []
     for recipe in recipes:
@@ -182,7 +183,7 @@ def recommend_recipes():
             if not matched:
                 safe_recipes.append(recipe)
             else:
-                print(f"Filtered out recipe {recipe_id} due to allergen match: {matched}")
+                print(f"Filtered out recipe {recipe_id} due to allergen match: {matched}", flush=True)
     return jsonify({'recipes': safe_recipes})
 
 # Endpoint for password reset
@@ -233,62 +234,83 @@ with open(labels_path, 'r') as f:
 # Endpoint for allergen prediction
 @app.route('/predict', methods=['POST'])
 def predict():
-        
-    
-    # Example: Load a file in a 'data' subfolder
-    model_path = os.path.join(BASE_DIR,'model', 'model.tflite')
-    # Load TFLite model for allergen detection
-    interpreter = tf.lite.Interpreter(model_path=model_path)
-    interpreter.allocate_tensors()
+    print("=== /predict endpoint called ===", flush=True)
+    try:
+        # Example: Load a file in a 'data' subfolder
+        model_path = os.path.join(BASE_DIR,'model', 'model.tflite')
+        print(f"Model path: {model_path}", flush=True)
+        # Load TFLite model for allergen detection
+        interpreter = tf.lite.Interpreter(model_path=model_path)
+        interpreter.allocate_tensors()
+        print("Interpreter loaded and tensors allocated.", flush=True)
 
-    # Get input/output details from the model
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-    # Get input text from request
-    data = request.get_json()
-    print("Received data:", data)
-    text = data['text']
-    print("Text to process:", text)
+        # Get input/output details from the model
+        input_details = interpreter.get_input_details()
+        output_details = interpreter.get_output_details()
+        print(f"Input details: {input_details}", flush=True)
+        print(f"Output details: {output_details}", flush=True)
 
-    # === Preprocess text ===
-    input_word_ids, input_mask, input_type_ids = preprocess(text)
+        # Get input text from request
+        data = request.get_json()
+        print("Received data:", data, flush=True)
+        text = data['text']
+        print("Text to process:", text, flush=True)
 
-    # Set TFLite model inputs
-    interpreter.set_tensor(input_details[0]['index'], input_word_ids)
-    interpreter.set_tensor(input_details[1]['index'], input_mask)
-    interpreter.set_tensor(input_details[2]['index'], input_type_ids)
+        # === Preprocess text ===
+        input_word_ids, input_mask, input_type_ids = preprocess(text)
+        print("Preprocessed input shapes:",
+              input_word_ids.shape, input_mask.shape, input_type_ids.shape, flush=True)
 
-    # Run the model
-    interpreter.invoke()
+        # Set TFLite model inputs
+        interpreter.set_tensor(input_details[0]['index'], input_word_ids)
+        interpreter.set_tensor(input_details[1]['index'], input_mask)
+        interpreter.set_tensor(input_details[2]['index'], input_type_ids)
+        print("Input tensors set.", flush=True)
 
-    # Get model output
-    output = interpreter.get_tensor(output_details[0]['index'])  # shape: (1, num_labels)
-    prediction = output[0]  # shape: (num_labels,)
+        # Run the model
+        interpreter.invoke()
+        print("Model invoked.", flush=True)
 
-    # Apply threshold to filter relevant predictions
-    threshold = 0.5
-    model_prediction = {
-        label: float(score)
-        for label, score in zip(ALLERGEN_LABELS, prediction)
-        if score > threshold
-    }
+        # Get model output
+        output = interpreter.get_tensor(output_details[0]['index'])  # shape: (1, num_labels)
+        prediction = output[0]  # shape: (num_labels,)
+        print("Raw model output:", prediction, flush=True)
 
-    # Prepare response
-    response = {
-        "model_prediction": model_prediction,
-        "final_decision": "Contains Allergens" if model_prediction else "No Major Allergens",
-        "high_risk_ingredients": list(model_prediction.keys()),
-        "confidence": "High" if model_prediction else "Low"
-    }
+        # Apply threshold to filter relevant predictions
+        threshold = 0.5
+        model_prediction = {
+            label: float(score)
+            for label, score in zip(ALLERGEN_LABELS, prediction)
+            if score > threshold
+        }
 
-    return jsonify(response)
+        # If no allergens above threshold, explicitly set to none
+        if not model_prediction:
+            response = {
+                "model_prediction": {},
+                "final_decision": "No Major Allergens",
+                "high_risk_ingredients": [],
+                "confidence": "Low"
+            }
+        else:
+            response = {
+                "model_prediction": model_prediction,
+                "final_decision": "Contains Allergens",
+                "high_risk_ingredients": list(model_prediction.keys()),
+                "confidence": "High"
+            }
+
+        return jsonify(response)
+    except Exception as e:
+        print("Exception in /predict:", e, flush=True)
+        return jsonify({'error': str(e)}), 500
 
 
 # Example: Load a file in a 'data' subfolder
 halal_model_path = os.path.join(BASE_DIR, 'halal_model.tflite')
 
 # Check if the halal model file exists
-print(os.path.exists(halal_model_path))
+print(os.path.exists(halal_model_path), flush=True)
 # Load TFLite model for halal detection
 
 
@@ -297,56 +319,146 @@ tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 e_code_mapping_path = 'e_code_mapping.json'
 
 # Endpoint for halal status check
+# Add commentMore actions
 @app.route('/halal_check', methods=['POST'])
 def halal_check():
-    halal_interpreter = tf.lite.Interpreter(model_path=halal_model_path)
-    halal_interpreter.allocate_tensors()
-    halal_input_details = halal_interpreter.get_input_details()
-    halal_output_details = halal_interpreter.get_output_details()
-
-    data = request.get_json()
-    text = data.get('text', '')
-    e_code = data.get('e_code', None)
-
-    print("Received text:", text)  # Debug input
-
-    # Preprocess input using your function
-    input_ids,attention_mask,e_code_input = preprocess_halal(
-        text,
-        e_code,
-        tokenizer=tokenizer,
-        e_code_mapping_path=e_code_mapping_path,
-        max_length=128
-    )
-   # Print input details
-    for i, detail in enumerate(halal_interpreter.get_input_details()):
-        print(f"Input {i}: name={detail['name']}, shape={detail['shape']}")
-
-    # Set tensors by name
-    for detail in halal_interpreter.get_input_details():
-        if detail['name'] == 'input_ids':
-            halal_interpreter.set_tensor(detail['index'], input_ids)
-        elif detail['name'] == 'attention_mask':
-            halal_interpreter.set_tensor(detail['index'], attention_mask)
-        elif detail['name'] == 'e_code_input':
-            halal_interpreter.set_tensor(detail['index'], e_code_input)
+    print("=== /halal_check endpoint called ===", flush=True)
+    print("Request data:", request.get_json(), flush=True)
     
-    # Run inference
-    halal_interpreter.invoke()
-    output = halal_interpreter.get_tensor(halal_output_details[0]['index'])  # shape: (1, 1)
-    halal_prob = float(output[0][0])
+    try:
+        halal_interpreter = tf.lite.Interpreter(model_path=halal_model_path)
+        halal_interpreter.allocate_tensors()
+        halal_input_details = halal_interpreter.get_input_details()
+        halal_output_details = halal_interpreter.get_output_details()
 
-    print("Halal probability:", halal_prob)  # Debug output
+        # Print model input details
+        print("\n=== MODEL INPUT DETAILS ===", flush=True)
+        for i, detail in enumerate(halal_input_details):
+            print(f"Input {i}: name='{detail['name']}', shape={detail['shape']}, dtype={detail['dtype']}", flush=True)
 
-    response = {
-        "halal_probability": halal_prob,
-        "halal_status": "Halal" if halal_prob > 0.5 else "Not Halal"
-    }
-    return jsonify(response)
+        data = request.get_json()
+        text = data.get('text', '')
+        e_code = data.get('e_code', None)
+
+        print(f"\nReceived text: '{text}'", flush=True)
+        print(f"Received e_code: '{e_code}'", flush=True)
+
+        # Preprocess input
+        input_ids, attention_mask, e_code_input = preprocess_halal(
+            text,
+            e_code,
+            tokenizer=tokenizer,
+            e_code_mapping_path=e_code_mapping_path,
+            max_length=128
+        )
+
+        # Print preprocessed data
+        print(f"\n=== PREPROCESSED DATA ===", flush=True)
+        print(f"input_ids shape: {input_ids.shape}, dtype: {input_ids.dtype}", flush=True)
+        print(f"input_ids min/max: {input_ids.min()}/{input_ids.max()}", flush=True)
+        print(f"input_ids first 10: {input_ids[0][:10]}", flush=True)
+        
+        print(f"attention_mask shape: {attention_mask.shape}, dtype: {attention_mask.dtype}", flush=True)
+        print(f"attention_mask sum: {attention_mask.sum()}", flush=True)
+        
+        print(f"e_code_input shape: {e_code_input.shape}, dtype: {e_code_input.dtype}", flush=True)
+        print(f"e_code_input value: {e_code_input}", flush=True)
+
+        # Validate input shapes match model expectations
+        print(f"\n=== SHAPE VALIDATION ===", flush=True)
+        for detail in halal_input_details:
+            if detail['name'] == 'input_ids':
+                expected_shape = detail['shape']
+                actual_shape = input_ids.shape
+                print(f"input_ids - Expected: {expected_shape}, Actual: {actual_shape}, Match: {expected_shape == list(actual_shape)}", flush=True)
+            elif detail['name'] == 'attention_mask':
+                expected_shape = detail['shape']
+                actual_shape = attention_mask.shape
+                print(f"attention_mask - Expected: {expected_shape}, Actual: {actual_shape}, Match: {expected_shape == list(actual_shape)}", flush=True)
+            elif detail['name'] == 'e_code_input':
+                expected_shape = detail['shape']
+                actual_shape = e_code_input.shape
+                print(f"e_code_input - Expected: {expected_shape}, Actual: {actual_shape}, Match: {expected_shape == list(actual_shape)}", flush=True)
+
+        # Additional safety checks before setting tensors
+        print(f"\n=== SAFETY CHECKS ===", flush=True)
+        
+        # Check for any extremely large values that might cause issues
+        if input_ids.max() > 50000:  # Reasonable upper bound for vocab
+            print(f"WARNING: Very large token ID detected: {input_ids.max()}", flush=True)
+            input_ids = np.clip(input_ids, 0, 30521)  # Clip to BERT vocab size
+            print(f"Clipped input_ids max to: {input_ids.max()}", flush=True)
+        
+        if e_code_input.max() > 1000:  # Reasonable upper bound for e-codes
+            print(f"WARNING: Very large e_code value detected: {e_code_input.max()}", flush=True)
+            e_code_input = np.clip(e_code_input, 0, 999)
+            print(f"Clipped e_code_input max to: {e_code_input.max()}", flush=True)
+
+        # Set tensors by name with error handling
+        print(f"\n=== SETTING TENSORS ===", flush=True)
+        for detail in halal_input_details:
+            try:
+                if detail['name'] == 'input_ids':
+                    print(f"Setting input_ids tensor...", flush=True)
+                    halal_interpreter.set_tensor(detail['index'], input_ids)
+                    print(f"✓ input_ids tensor set successfully", flush=True)
+                elif detail['name'] == 'attention_mask':
+                    print(f"Setting attention_mask tensor...", flush=True)
+                    halal_interpreter.set_tensor(detail['index'], attention_mask)
+                    print(f"✓ attention_mask tensor set successfully", flush=True)
+                elif detail['name'] == 'e_code_input':
+                    print(f"Setting e_code_input tensor...", flush=True)
+                    halal_interpreter.set_tensor(detail['index'], e_code_input)
+                    print(f"✓ e_code_input tensor set successfully", flush=True)
+            except Exception as tensor_error:
+                print(f"ERROR setting tensor {detail['name']}: {tensor_error}", flush=True)
+                raise tensor_error
+
+        # Try to invoke with additional error context
+        print(f"\n=== INVOKING MODEL ===", flush=True)
+        try:
+            halal_interpreter.invoke()
+            print(f"✓ Model invocation successful", flush=True)
+        except Exception as invoke_error:
+            print(f"ERROR during model invocation: {invoke_error}", flush=True)
+            print(f"Error type: {type(invoke_error)}", flush=True)
+            
+            # Try to identify which specific input might be causing the issue
+            print(f"\n=== DEBUGGING SPECIFIC INPUTS ===", flush=True)
+            
+            # Check if it's the input_ids causing issues
+            unique_tokens = np.unique(input_ids)
+            print(f"Unique tokens in input_ids: {len(unique_tokens)}", flush=True)
+            print(f"Token range: {unique_tokens.min()} to {unique_tokens.max()}", flush=True)
+            
+            # Check e_code specifically
+            print(f"E-code value being passed: {e_code_input[0][0]}", flush=True)
+            
+            raise invoke_error
+
+        # Get output
+        output = halal_interpreter.get_tensor(halal_output_details[0]['index'])
+        halal_prob = float(output[0][0])
+
+        print(f"Halal probability: {halal_prob}", flush=True)
+
+        response = {
+            "halal_probability": halal_prob,
+            "halal_status": "Halal" if halal_prob > 0.5 else "Not Halal"
+        }
+        return jsonify(response)
+
+    except Exception as e:
+        print(f"\n=== FATAL ERROR ===", flush=True)
+        print(f"Error: {str(e)}", flush=True)
+        print(f"Error type: {type(e)}", flush=True)
+        import traceback
+        print(f"Full traceback: {traceback.format_exc()}", flush=True)
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 
 # Tooba Model End --------------------------------------------------------------------------------------------------------------------------
 
 # Main entry point
 if __name__ == '__main__':
     # Run the Flask app on all network interfaces, port 5000, with debug mode on
-    app.run(host='0.0.0.0', port=5050)
+    app.run(host='0.0.0.0',debug=True, port=5050)

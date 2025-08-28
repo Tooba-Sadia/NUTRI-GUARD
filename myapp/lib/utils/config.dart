@@ -1,4 +1,4 @@
 class AppConfig {
-  static const String baseUrl = "http://192.168.18.39:5050"; // change only here
+  static const String baseUrl = "https://fea7-2402-ad80-103-e051-b101-6bb1-4601-8a3.ngrok-free.app"; // change only here
 }
   

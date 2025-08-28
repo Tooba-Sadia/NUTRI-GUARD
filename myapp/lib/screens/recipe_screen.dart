@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myapp/utils/config.dart';
 import 'package:provider/provider.dart';
 import '../routes/app_router.dart';
 import '../state/user_state.dart';
@@ -42,13 +43,16 @@ class _RecipeScreenState extends State<RecipeScreen> {
     });
     try {
       final response = await http.post(
-        Uri.parse(' https://eeaf-121-52-145-236.ngrok-free.app/recipes/recommend'),
+        Uri.parse('http://192.168.245.101:5050/recipes/recommend'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'allergens': userState.allergens}),
-      ).timeout(const Duration(seconds: 10)); // <-- Add timeout
+      );
+        final data = jsonDecode(response.body);
+
+      print('Recipe fetch status: ${response.statusCode}');
+      print('Recipe fetch body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
         setState(() {
           recipes = data['recipes'] ?? [];
           loading = false;

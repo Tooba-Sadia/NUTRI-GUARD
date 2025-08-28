@@ -28,13 +28,18 @@ class _HalalViewState extends State<HalalView> {
   }
 
   Future<void> _checkHalalStatus() async {
-    try {
-      debugPrint('Recognized text: ${widget.text}'); // Log the recognized text 
-      final response = await http.post(
-        Uri.parse('${AppConfig.baseUrl}/halal_check'),
+    print("This is the text received in halal view:${widget.text}");
+     final response = await http.post(
+        Uri.parse('http://192.168.245.101:5050/halal_check'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'text': widget.text}),
       );
+
+      print("This is the response of the check halal status:${response.body}");
+    try {
+      debugPrint('Recognized text: ${widget.text}'); // Log the recognized text 
+     
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {

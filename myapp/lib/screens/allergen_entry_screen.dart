@@ -3,6 +3,7 @@
 // ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
+import 'package:myapp/utils/config.dart';
 import 'package:provider/provider.dart';
 import '../state/user_state.dart';
 import 'package:http/http.dart' as http;
@@ -43,7 +44,7 @@ class _AllergenEntryScreenState extends State<AllergenEntryScreen> {
     print('Saving allergens for userId: $userId, allergens: $_allergens');
     try {
       final response = await http.post(
-        Uri.parse(' https://eeaf-121-52-145-236.ngrok-free.app/user/allergens'),
+        Uri.parse('${AppConfig.baseUrl}/user/allergens'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'user_id': userId, 'allergens': _allergens}),
       );
